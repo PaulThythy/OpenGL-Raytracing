@@ -17,7 +17,7 @@ public:
 
     ~Sphere() {}
 
-    std::vector<Vector3&> AppendAllIntersections(const Ray& ray);
+    Vector3* intersect(const Ray& ray);
 
     double distance(const Vector3& point);
     bool isInside(const Vector3& point);

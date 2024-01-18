@@ -3,17 +3,25 @@
 
 #include "sphere.h"
 
-std::vector<Vector3&> Sphere::AppendAllIntersections(const Ray& ray) {
-    std::vector<Vector3> intersections;
+Vector3* Sphere::intersect(const Ray& ray) {
+    Vector3 oc = ray.origin - center;
+    double a = ray.direction.dot(ray.direction);
+    double b = 2.0 * oc.dot(ray.direction);
+    double c = oc.dot(oc) - radius * radius;
+    double discriminant = b * b - 4 * a * c;
 
-    // Calculate the coefficients of the quadratic equation
-    //     au^2 + bu + c = 0.
-    // Solving this equation gives us the value of u
-    // for any intersection points.
-
-    const Vector3 displacement = ray.origin - this->center;
-    const double a = ray.direction.magnitudeSquared();
-    //const double b = 
+    if(discriminant < 0) {
+        return nullptr;     //no intersection
+    }
+    else{
+        float t = (-b - std::sqrt(discriminant)) / (2.0 * a);
+        if(t > 0) {
+            return new Vector3(ray.origin + ray.direction * t);
+        }
+        else {
+            return nullptr;         //intersection behind ray origin
+        }
+    }
 }
 
 double Sphere::distance(const Vector3& point) {
