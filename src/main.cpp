@@ -88,47 +88,57 @@ void display()
 
     Sphere sphere(Vector3(0, 0, 0), 2);
 
-    for (int x = 0; x < screenWidth; ++x)
+    for (int y = 0; y < screenHeight; ++y)
     {
-        for (int y = 0; y < screenHeight; ++y)
+        for (int x = 0; x < screenWidth; ++x)
         {
             Vector3 origin(0,0,10);
             Vector3 direction = getRayDirection(x, y);
             Ray ray(origin, direction);
 
-            if(sphere.intersect(ray)) {
+            if(sphere.intersect(ray) != nullptr) {
                 Vector3* intersection = sphere.intersect(ray);
                 glPointSize(2.0f);
                 glBegin(GL_POINTS);
                 glColor3d(1.0, 0.0, 0.0);
                 glVertex3d(intersection->x, intersection->y, intersection->z); 
                 glEnd();
+
+                delete intersection;
             }
         }
     }
 
     glPopMatrix();
-    /* force result display */
     glFlush();
 }
 
-Vector3 getRayDirection(int x, int y) {
-    float normalizedX = (x / (float)screenWidth - 0.5f) * 2.0f; // Convertir en coordonnées normalisées de l'espace écran
-    float normalizedY = (y / (float)screenHeight - 0.5f) * 2.0f;
-
-    float imagePlaneHeight = 2.0f * tan(fov * 0.5f * M_PI / 180.0f) * zNear; // Hauteur du plan d'image
-    float imagePlaneWidth = imagePlaneHeight * aspectRatio; // Largeur du plan d'image
-
-    Vector3 imagePoint = Vector3(
-        normalizedX * imagePlaneWidth / 2.0f, 
-        normalizedY * imagePlaneHeight / 2.0f,
-        -zNear // La caméra regarde vers le -z
-    );
-
-    Vector3 rayDirection = imagePoint - Vector3(0, 0, 10); // Direction du rayon de la caméra au point d'image
-    rayDirection.normalize(); // Normaliser la direction du rayon
-
+/*Vector3 getRayDirection(int x, int y) {
+    double Px = (2 * ((x + 0.5) / screenWidth) - 1) * tan(fov / 2 * M_PI / 180) * aspectRatio;
+    double Py = (1 - 2 * ((y + 0.5) / screenHeight)) * tan(fov / 2 * M_PI / 180);
+    std::cout << Px << ", " << Py << std::endl;
+    Vector3 v(Px, Py, -1);
+    //Vector3 rayDirection = v - rayOrigin;
+    Vector3 rayDirection = rayDirection.normalize();
+    std::cout << rayDirection.x << ", " << rayDirection.y << ", " << rayDirection.z << std::endl;
     return rayDirection;
+}*/
+
+Vector3 getRayDirection(int x, int y) {
+    // Convertir les angles de degrés en radians pour les fonctions trigonométriques
+    float radFov = fov * M_PI / 180.0;
+
+    // Calcul de la hauteur et de la largeur de la vue
+    float viewHeight = 2.0 * tan(radFov / 2.0);
+    float viewWidth = aspectRatio * viewHeight;
+
+    // Normalisation des coordonnées x et y
+    float normalizedX = (x + 0.5) / screenWidth * viewWidth - viewWidth / 2.0;
+    float normalizedY = -(y + 0.5) / screenHeight * viewHeight + viewHeight / 2.0;
+
+    // Création de la direction du rayon et normalisation
+    Vector3 rayDirection(normalizedX, normalizedY, -1.0);
+    return rayDirection.normalize(); // Assurez-vous que la méthode normalize() ne modifie pas l'état de l'objet rayDirection
 }
 
 void initOpenGl() {

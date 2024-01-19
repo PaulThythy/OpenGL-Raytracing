@@ -19,7 +19,7 @@ struct Vector3 {
         return pow(magnitude(), 2);
     }
 
-    inline Vector3& normalize() {
+    inline Vector3 normalize() {
         double mag = magnitude();
         Vector3 v(x/mag, y/mag, z/mag);
         return v;
@@ -29,7 +29,7 @@ struct Vector3 {
         return x * other.x + y * other.y + z * other.z;
     }
 
-    inline Vector3& cross(const Vector3& other) const {
+    inline Vector3 cross(const Vector3& other) const {
         Vector3 v(y * other.z - z * other.y,
             z * other.x - x * other.z,
             x * other.y - y * other.x
