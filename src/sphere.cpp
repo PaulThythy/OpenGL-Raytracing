@@ -24,6 +24,10 @@ Vector3* Sphere::intersect(const Ray& ray) {
     }
 }
 
+Vector3 Sphere::normalAt(const Vector3* intersection) const {
+    return (intersection - center).normalize();
+}
+
 double Sphere::distance(const Vector3& point) {
     int x1 = pow(point.x - this->center.x, 2);
     int y1 = pow(point.y - this->center.y, 2);

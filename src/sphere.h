@@ -6,14 +6,16 @@
 
 #include "vector3.h"
 #include "ray.h"
+#include "material.h"
 
 class Sphere {
-private:
+public:
     Vector3 center;
     double radius;
+    Material material;
 
-public:
-    Sphere(const Vector3& _center, const double _radius): center(_center), radius(_radius) {}
+    Sphere(const Vector3& _center, const double _radius, const Material& _material): 
+        center(_center), radius(_radius), material(_material) {}
 
     ~Sphere() {}
 
@@ -23,6 +25,7 @@ public:
     bool isInside(const Vector3& point);
     bool isOn(const Vector3& point);
     bool isOutside(const Vector3& point);
+    Vector3 normalAt(const Vector3* intersection) const;
 };
 
 #endif

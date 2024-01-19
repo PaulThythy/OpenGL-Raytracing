@@ -9,6 +9,7 @@
 
 #include "sphere.h"
 #include "vector3.h"
+#include "light.h"
 
 int screenHeight = 500;
 int screenWidth = 500;
@@ -85,8 +86,13 @@ void display()
     glRotatef(cameraAngleY, 0., 1., 0.);
 
     displayBasis();
+    LightType AMBIANT = AMBIENT; LightType DIRECTIONAL = DIRECTIONAL;
+    Light ambientLight(AMBIENT, Vector3(8, 5, 2), Vector3(.1,.1,1)*0.5);
+    Light diffuseLight(DIRECTIONAL, Vector3(8, 5, 2), Vector3(.0,1,.0)*0.8);
 
-    Sphere sphere(Vector3(0, 0, 0), 2);
+
+    Material material(0.2, 0.3);
+    Sphere sphere(Vector3(0, 0, 0), 2, material);
 
     for (int y = 0; y < screenHeight; ++y)
     {
@@ -98,9 +104,23 @@ void display()
 
             if(sphere.intersect(ray) != nullptr) {
                 Vector3* intersection = sphere.intersect(ray);
+                Vector3 finalColor(0,0,0);
+
+                if(ambientLight.type == AMBIENT) {
+                    finalColor += ambientLight.intensity * sphere.material.Ka;
+                }
+
+                if(diffuseLight.type == POINT) {
+                    Vector3 Vi = (diffuseLight.position - *intersection).normalize();
+                    Vector3 N = sphere.normalAt(intersection);
+                    double cosTheta = std::max(N.dot(Vi), 0.0f);
+                    Vector3 Id = diffuseLight.intensity * sphere.material.Kd * cosTheta;
+                    finalColor += Id;
+                }
+
                 glPointSize(2.0f);
                 glBegin(GL_POINTS);
-                glColor3d(1.0, 0.0, 0.0);
+                glColor3d(finalColor.x, finalColor.y, finalColor.z);
                 glVertex3d(intersection->x, intersection->y, intersection->z); 
                 glEnd();
 
@@ -112,17 +132,6 @@ void display()
     glPopMatrix();
     glFlush();
 }
-
-/*Vector3 getRayDirection(int x, int y) {
-    double Px = (2 * ((x + 0.5) / screenWidth) - 1) * tan(fov / 2 * M_PI / 180) * aspectRatio;
-    double Py = (1 - 2 * ((y + 0.5) / screenHeight)) * tan(fov / 2 * M_PI / 180);
-    std::cout << Px << ", " << Py << std::endl;
-    Vector3 v(Px, Py, -1);
-    //Vector3 rayDirection = v - rayOrigin;
-    Vector3 rayDirection = rayDirection.normalize();
-    std::cout << rayDirection.x << ", " << rayDirection.y << ", " << rayDirection.z << std::endl;
-    return rayDirection;
-}*/
 
 Vector3 getRayDirection(int x, int y) {
     // Convertir les angles de degrés en radians pour les fonctions trigonométriques

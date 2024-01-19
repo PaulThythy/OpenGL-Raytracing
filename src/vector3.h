@@ -36,6 +36,10 @@ struct Vector3 {
         );
         return v;
     }
+
+    inline void operator+=(const Vector3& v) {
+        this->x += v.x; this->y += v.y; this->z += v.z;
+    }
 };
 
 inline Vector3 operator-(const Vector3& v1, const Vector3& v2) {
