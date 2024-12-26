@@ -129,6 +129,7 @@ void Application::cleanup()
 }
 
 void Application::run() {
+    ImVec4 clearColor(0.45f, 0.55f, 0.60f, 1.00f);
     while (!m_Done)
     {
         processEvents();
@@ -155,7 +156,7 @@ void Application::run() {
             ImGui::Checkbox("Another Window", &m_ShowAnotherWindow);
 
             ImGui::SliderFloat("float", &m_SliderFloat, 0.0f, 1.0f);
-            ImGui::ColorEdit3("clear color", (float*)&m_Renderer.m_ClearColor);
+            ImGui::ColorEdit3("clear color", (float*)&clearColor);
 
             if (ImGui::Button("Button"))
                 m_Counter++;
@@ -179,7 +180,17 @@ void Application::run() {
         }
         // ----------------------------------------------------------------------------------
 
-        m_Renderer.render(ImGui::GetIO());
+        ImGui::Render();
+
+        glViewport(0, 0, static_cast<int>(ImGui::GetIO().DisplaySize.x), static_cast<int>(ImGui::GetIO().DisplaySize.y));
+
+        glClearColor(clearColor.x * clearColor.w,
+                    clearColor.y * clearColor.w,
+                    clearColor.z * clearColor.w,
+                    clearColor.w);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         SDL_GL_SwapWindow(m_Window);
     }

@@ -4,6 +4,8 @@ project(OpenglRaytracer C CXX)
 file(GLOB_RECURSE sources src/**.cpp)
 file(GLOB_RECURSE headers src/**.h)
 
+include_directories(${CMAKE_SOURCE_DIR}/src)
+
 # SDL3
 set(SDL_DIR ${CMAKE_SOURCE_DIR}/libs/SDL)
 add_subdirectory(${SDL_DIR})

@@ -15,7 +15,6 @@
 #include "imgui.h"
 #include "imgui_impl_sdl3.h"
 #include "imgui_impl_opengl3.h"
-#include "Renderer.h"
 
 class Application {
 
@@ -35,8 +34,6 @@ private:
     SDL_Window*   m_Window       = nullptr;
     SDL_GLContext m_GLContext    = nullptr;
     bool          m_Done         = false;
-
-    Renderer      m_Renderer;
 
     bool m_ShowDemoWindow        = true;
     bool m_ShowAnotherWindow     = false;
