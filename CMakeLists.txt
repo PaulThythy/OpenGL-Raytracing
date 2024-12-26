@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 project(OpenglRaytracer C CXX)
 
 file(GLOB_RECURSE sources src/**.cpp)
@@ -17,11 +17,15 @@ include_directories(${IMGUI_DIR} ${IMGUI_DIR}/backends ..)
 
 # OpenGL
 find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
 
-set(LIBRARIES "SDL3::SDL3;OpenGL::GL")
+set(LIBRARIES "SDL3::SDL3;OpenGL::GL;GLEW::GLEW")
 
 add_executable(${PROJECT_NAME} ${sources} ${headers}
     ${IMGUI_DIR}/imgui.cpp ${IMGUI_DIR}/imgui_demo.cpp ${IMGUI_DIR}/imgui_draw.cpp ${IMGUI_DIR}/imgui_tables.cpp ${IMGUI_DIR}/imgui_widgets.cpp
     ${IMGUI_DIR}/backends/imgui_impl_sdl3.cpp ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
+
+file(TO_CMAKE_PATH "${PROJECT_SOURCE_DIR}/shaders" SHADER_DIR)
+target_compile_definitions(${PROJECT_NAME} PRIVATE SHADER_DIR="${SHADER_DIR}")

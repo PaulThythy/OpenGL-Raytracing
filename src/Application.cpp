@@ -4,6 +4,7 @@ Application::Application() {
     setupSDL();
     initSDL();
     setupImGui();
+    initComputeShader();
 }
 
 Application::~Application()
@@ -12,6 +13,10 @@ Application::~Application()
 }
 
 void Application::setupSDL() {
+    if (glewInit() != GLEW_OK) {
+        std::runtime_error(std::string("Failed to initialize GLEW"));
+    }
+
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD))
     {
         throw std::runtime_error(std::string("SDL_Init: ") + SDL_GetError());
@@ -128,6 +133,75 @@ void Application::cleanup()
     SDL_Quit();
 }
 
+void Application::initComputeShader() {
+    // 1) Load compute shader
+    m_ComputeProgram = Shader::loadComputeShader(std::string(SHADER_DIR) + "/compute.glsl");
+    if (!m_ComputeProgram)
+    {
+        std::cerr << "Error: Could not load compute shader program.\n";
+        return;
+    }
+
+    // 2) Create a texture that the compute shader will fill.
+    glGenTextures(1, &m_ComputeTexture);
+    glBindTexture(GL_TEXTURE_2D, m_ComputeTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,    // target
+        0,                // level
+        GL_RGBA32F,       // internal format
+        512, 512,         // width, height
+        0,                // border
+        GL_RGBA,          // px format
+        GL_FLOAT,         // type
+        nullptr           // data (nullptr => initialized as void)
+    );
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // 3) Specify that this texture can be written as an image in the compute shader
+    glBindImageTexture(
+        0,                   // unit = 0
+        m_ComputeTexture,
+        0,                   // level
+        GL_FALSE,            // layered
+        0,                   // layer
+        GL_WRITE_ONLY,       // access
+        GL_RGBA32F           // format
+    );
+
+    // good practice : unbind the texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    std::cout << "Compute shader initialized.\n";
+
+}
+
+void Application::runComputeShader()
+{
+    if (!m_ComputeProgram) {
+        return;
+    }
+
+    // 1) Activate compute shader
+    glUseProgram(m_ComputeProgram);
+
+    // 2) Run calculation on 512x512 pixels, with 16x16 groups
+    //    => (512 / 16) = 32 groups in X and 32 groups in Y
+    glDispatchCompute(512 / 16, 512 / 16, 1);
+
+    // 3) Make sure that writing to the image2D is complete before reading or using the texture afterwards.
+    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+    // 4) Deactivate program
+    glUseProgram(0);
+
+    // At this point, m_ComputeTexture contains the result of the compute shader
+    // We could now render (a quad fullscreen) by reading this texture
+    // using a conventional vertex+fragment shader.
+}
+
+
 void Application::run() {
     ImVec4 clearColor(0.45f, 0.55f, 0.60f, 1.00f);
     while (!m_Done)
@@ -143,6 +217,8 @@ void Application::run() {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
+
+        //runComputeShader();
 
         // ----------------------------------------------------------------------------------
         if (m_ShowDemoWindow)
