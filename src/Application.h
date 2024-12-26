@@ -38,8 +38,6 @@ private:
 
     Renderer      m_Renderer;
 
-    //ImGuiIO* m_IO;
-
     bool m_ShowDemoWindow        = true;
     bool m_ShowAnotherWindow     = false;
 
