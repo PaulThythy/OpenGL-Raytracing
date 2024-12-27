@@ -305,7 +305,7 @@ void Application::run() {
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
 
-        //runComputeShader();
+        runComputeShader();
 
         // ----------------------------------------------------------------------------------
         if (m_ShowDemoWindow)
