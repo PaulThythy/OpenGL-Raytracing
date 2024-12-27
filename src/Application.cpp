@@ -143,6 +143,9 @@ void Application::initComputeShader() {
         return;
     }
 
+    int w, h;
+    SDL_GetWindowSize(m_Window, &w, &h);
+
     // 2) Create a texture that the compute shader will fill.
     glGenTextures(1, &m_ComputeTexture);
     glBindTexture(GL_TEXTURE_2D, m_ComputeTexture);
@@ -150,7 +153,7 @@ void Application::initComputeShader() {
         GL_TEXTURE_2D,    // target
         0,                // level
         GL_RGBA32F,       // internal format
-        512, 512,         // width, height
+        w, h,         // width, height
         0,                // border
         GL_RGBA,          // px format
         GL_FLOAT,         // type
@@ -254,9 +257,14 @@ void Application::runComputeShader()
     // 1) Activate compute shader
     glUseProgram(m_ComputeProgram);
 
-    // 2) Run calculation on 512x512 pixels, with 16x16 groups
-    //    => (512 / 16) = 32 groups in X and 32 groups in Y
-    glDispatchCompute(512 / 16, 512 / 16, 1);
+    int w, h;
+    SDL_GetWindowSize(m_Window, &w, &h);
+
+    // Calculate the number of groups (16x16) covering w,h
+    int groupX = (w + 16 - 1) / 16; // to round up
+    int groupY = (h + 16 - 1) / 16;
+
+    glDispatchCompute(groupX, groupY, 1);
 
     // 3) Make sure that writing to the image2D is complete before reading or using the texture afterwards.
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
