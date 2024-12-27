@@ -40,7 +40,10 @@ private:
     void cleanup();
 
     void initComputeShader();
+    void initRenderShader();
     void runComputeShader();
+
+    void renderFullscreenQuad();
 
     SDL_Window*   m_Window      = nullptr;
     SDL_GLContext m_GLContext   = nullptr;
@@ -54,6 +57,11 @@ private:
 
     GLuint m_ComputeProgram     = 0;
     GLuint m_ComputeTexture     = 0;
+
+    GLuint m_RenderProgram      = 0;
+
+    GLuint m_QuadVAO         = 0;  
+    GLuint m_QuadVBO         = 0;  
 };
 
 #endif

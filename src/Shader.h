@@ -8,57 +8,109 @@
 
 namespace Shader {
 
-    inline GLuint loadComputeShader(const std::string& filePath) {
+    inline std::string readFile(const std::string& filePath) {
         std::ifstream file(filePath);
-        if (!file.is_open()) {
-            std::cerr << "Failed to open compute shader file: " << filePath << std::endl;
-            return 0;
+        if (!file.is_open()) 
+        {
+            std::cerr << "Failed to open shader file: " << filePath << std::endl;
+            return "";
         }
-
-        std::stringstream shaderStream;
-        shaderStream << file.rdbuf();
+        std::stringstream buffer;
+        buffer << file.rdbuf();
         file.close();
+        return buffer.str();
+    }
 
-        std::string shaderCode = shaderStream.str();
-        const char* shaderSource = shaderCode.c_str();
+    inline GLuint compileShader(GLenum shaderType, const std::string& shaderCode)
+    {
+        if (shaderCode.empty())
+            return 0;
 
-        GLuint shaderID = glCreateShader(GL_COMPUTE_SHADER);
-        glShaderSource(shaderID, 1, &shaderSource, nullptr);
+        const char* sourcePtr = shaderCode.c_str();
+        GLuint shaderID = glCreateShader(shaderType);
+        glShaderSource(shaderID, 1, &sourcePtr, nullptr);
         glCompileShader(shaderID);
 
         GLint compileStatus;
         glGetShaderiv(shaderID, GL_COMPILE_STATUS, &compileStatus);
-        if (compileStatus == GL_FALSE) {
+        if (compileStatus == GL_FALSE) 
+        {
             GLint logLength;
             glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &logLength);
 
             std::string log(logLength, '\0');
             glGetShaderInfoLog(shaderID, logLength, nullptr, &log[0]);
-            std::cerr << "Compute Shader compilation error: " << log << std::endl;
+            std::cerr << "Shader compilation error:\n" << log << std::endl;
 
             glDeleteShader(shaderID);
             return 0;
         }
+        return shaderID;
+    }
 
+    inline GLuint linkProgram(const std::initializer_list<GLuint>& shaderIDs)
+    {
         GLuint programID = glCreateProgram();
-        glAttachShader(programID, shaderID);
+
+        for (auto sid : shaderIDs) 
+        {
+            if (sid != 0)
+                glAttachShader(programID, sid);
+        }
+
         glLinkProgram(programID);
 
         GLint linkStatus;
         glGetProgramiv(programID, GL_LINK_STATUS, &linkStatus);
-        if (linkStatus == GL_FALSE) {
+        if (linkStatus == GL_FALSE)
+        {
             GLint logLength;
             glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &logLength);
 
             std::string log(logLength, '\0');
             glGetProgramInfoLog(programID, logLength, nullptr, &log[0]);
-            std::cerr << "Program linking error: " << log << std::endl;
+            std::cerr << "Program linking error:\n" << log << std::endl;
 
             glDeleteProgram(programID);
             return 0;
         }
 
-        glDeleteShader(shaderID); // Shader can be deleted after linking
+        for (auto sid : shaderIDs)
+        {
+            if (sid != 0)
+            {
+                glDetachShader(programID, sid);
+                glDeleteShader(sid);
+            }
+        }
+
+        return programID;
+    }
+
+    inline GLuint loadRenderShader(const std::string& vertexPath, const std::string& fragmentPath)
+    {
+        std::string vertexCode = readFile(vertexPath);
+        GLuint vertexID = compileShader(GL_VERTEX_SHADER, vertexCode);
+        if (!vertexID)
+            return 0;
+
+        std::string fragmentCode = readFile(fragmentPath);
+        GLuint fragmentID = compileShader(GL_FRAGMENT_SHADER, fragmentCode);
+        if (!fragmentID)
+            return 0;
+
+        GLuint programID = linkProgram({ vertexID, fragmentID });
+        return programID;
+    }
+
+    inline GLuint loadComputeShader(const std::string& computePath)
+    {
+        std::string computeCode = readFile(computePath);
+        GLuint computeID = compileShader(GL_COMPUTE_SHADER, computeCode);
+        if (!computeID)
+            return 0;
+
+        GLuint programID = linkProgram({ computeID });
         return programID;
     }
 }
