@@ -15,6 +15,7 @@ public:
 
     void runComputeShader(int windowWidth, int windowHeight);
     void renderFullscreenQuad();
+    void resizeComputeTexture(int windowWidth, int windowHeight);
 
 private:
     void initComputeShader(int windowWidth, int windowHeight);

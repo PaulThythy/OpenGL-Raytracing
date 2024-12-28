@@ -221,14 +221,34 @@ void Application::processEvents() {
     while (SDL_PollEvent(&event))
     {
         ImGui_ImplSDL3_ProcessEvent(&event);
-        if (event.type == SDL_EVENT_QUIT)
+
+        switch(event.type)
         {
-            m_Done = true;
-        }
-        else if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED
-                 && event.window.windowID == SDL_GetWindowID(m_Window))
-        {
-            m_Done = true;
+            case SDL_EVENT_QUIT:
+            {
+                m_Done = true;
+            }
+            break;
+
+            case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+            {
+                if (event.window.windowID == SDL_GetWindowID(m_Window)) {
+                    m_Done = true;
+                }
+            }
+            break;
+
+            case SDL_EVENT_WINDOW_RESIZED:
+            {
+                int newW = event.window.data1;
+                int newH = event.window.data2;
+
+                m_Renderer.resizeComputeTexture(newW, newH);
+            }
+            break;
+
+            default:
+                break;
         }
     }
 

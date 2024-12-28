@@ -184,3 +184,36 @@ void Renderer::renderFullscreenQuad()
     glBindTexture(GL_TEXTURE_2D, 0);
     glUseProgram(0);
 }
+
+void Renderer::resizeComputeTexture(int width, int height)
+{
+    if (m_ComputeTexture) {
+        glDeleteTextures(1, &m_ComputeTexture);
+        m_ComputeTexture = 0;
+    }
+    glGenTextures(1, &m_ComputeTexture);
+    glBindTexture(GL_TEXTURE_2D, m_ComputeTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA32F,
+        width, height,
+        0,
+        GL_RGBA,
+        GL_FLOAT,
+        nullptr
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glBindImageTexture(
+        0,
+        m_ComputeTexture,
+        0,
+        GL_FALSE,
+        0,
+        GL_WRITE_ONLY,
+        GL_RGBA32F
+    );
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
