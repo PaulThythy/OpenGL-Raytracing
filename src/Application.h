@@ -19,7 +19,7 @@
 #include "imgui_impl_sdl3.h"
 #include "imgui_impl_opengl3.h"
 
-#include "Shader.h"
+#include "Renderer.h"
 
 class Application {
 
@@ -39,29 +39,16 @@ private:
 
     void cleanup();
 
-    void initComputeShader();
-    void initRenderShader();
-    void runComputeShader();
-
-    void renderFullscreenQuad();
-
     SDL_Window*   m_Window      = nullptr;
     SDL_GLContext m_GLContext   = nullptr;
     bool          m_Done        = false;
+    Renderer m_Renderer;
 
     bool m_ShowDemoWindow       = true;
     bool m_ShowAnotherWindow    = false;
 
     float m_SliderFloat         = 0.0f;
     int   m_Counter             = 0;
-
-    GLuint m_ComputeProgram     = 0;
-    GLuint m_ComputeTexture     = 0;
-
-    GLuint m_RenderProgram      = 0;
-
-    GLuint m_QuadVAO         = 0;  
-    GLuint m_QuadVBO         = 0;  
 };
 
 #endif
