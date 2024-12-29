@@ -4,20 +4,20 @@
 #include <GL/glew.h>
 
 #include "Shader/Shader.h"
+#include "Application/Scene.h"
 
 struct Renderer {
 public:
     Renderer();
     ~Renderer();
 
-    void init(int windowWidth, int windowHeight);
+    void init(int windowWidth, int windowHeight, SDL_Window* window);
     void cleanup();
 
     void runComputeShader(int windowWidth, int windowHeight);
     void renderFullscreenQuad();
     void resizeComputeTexture(int windowWidth, int windowHeight);
 
-private:
     void initComputeShader(int windowWidth, int windowHeight);
     void initRenderShader();
 
@@ -28,6 +28,8 @@ private:
 
     GLuint m_QuadVAO            = 0;
     GLuint m_QuadVBO            = 0;
+
+    Scene m_Scene;
 };
 
 #endif

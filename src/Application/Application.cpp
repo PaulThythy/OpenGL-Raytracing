@@ -8,7 +8,7 @@ Application::Application() {
     int w, h;
     SDL_GetWindowSize(m_Window, &w, &h);
 
-    m_Renderer.init(w, h);
+    m_Renderer.init(w, h, m_Window);
 }
 
 Application::~Application()
@@ -244,6 +244,9 @@ void Application::processEvents() {
                 int newH = event.window.data2;
 
                 m_Renderer.resizeComputeTexture(newW, newH);
+                m_Renderer.m_Scene.m_Camera.m_AspectRatio = static_cast<float>(newW)/static_cast<float>(newH);
+                m_Renderer.m_Scene.updateCameraUniforms();
+                m_Renderer.runComputeShader(newW, newH);
             }
             break;
 

@@ -15,13 +15,13 @@ struct Ray {
     vec3 direction;
 };
 
-struct Camera {
-    vec3 origin;
+uniform struct Camera {
+    vec3 lookFrom;
     vec3 lookAt;
     vec3 up;
     float fov;
     float aspectRatio;
-};
+} camera;
 
 struct Light {
     vec3 position;
@@ -155,7 +155,7 @@ bool intersectScene(Ray ray,
 
 Ray getCameraRay(Camera cam, float u, float v)
 {
-    vec3 forward = normalize(cam.lookAt - cam.origin);
+    vec3 forward = normalize(cam.lookAt - cam.lookFrom);
     vec3 right   = normalize(cross(forward, cam.up));
     vec3 upVec   = cross(right, forward);
 
@@ -171,7 +171,7 @@ Ray getCameraRay(Camera cam, float u, float v)
                             + y * halfHeight * upVec);
 
     Ray r;
-    r.origin    = cam.origin;
+    r.origin    = cam.lookFrom;
     r.direction = rayDir;
     return r;
 }
@@ -221,25 +221,18 @@ void main()
     triangles[1].v1     = vec3( 10.0, 0.0, -10.0);
     triangles[1].v2     = vec3( -10.0, 0.0, -10.0);
     triangles[1].albedo = vec3(1.0, 1.0, 1.0);
-    triangles[0].specular = vec3(1.0, 1.0, 1.0);
-    triangles[0].shininess= 16.0;
+    triangles[1].specular = vec3(1.0, 1.0, 1.0);
+    triangles[1].shininess= 16.0;
 
     const int MAX_LIGHTS = 1; Light lights[MAX_LIGHTS];
     lights[0].position = vec3(1.0, 3.0, 0.0);
     lights[0].color = vec3(1.0, 1.0, 1.0);
-    lights[0].power = 1.0;
-    
-    Camera cam;
-    cam.origin = vec3(4, 4, 4);       
-    cam.lookAt = vec3(0, 0, 0);     
-    cam.up     = vec3(0, 1, 0);       
-    cam.fov    = 60.0;           
+    lights[0].power = 1.0;        
     
     ivec2 pixelCoord    = ivec2(gl_GlobalInvocationID.xy);
     vec2 imgSize        = vec2(imageSize(outputImage));
-    cam.aspectRatio     = imgSize.x / imgSize.y;
     vec2 uv             = (pixelCoord + 0.5) / imgSize;  
-    Ray ray             = getCameraRay(cam, uv.x, uv.y);
+    Ray ray             = getCameraRay(camera, uv.x, uv.y);
 
     HitRecord rec;
     bool hit = intersectScene(ray, spheres, MAX_SPHERES, triangles, MAX_TRIANGLES, rec);
@@ -259,7 +252,7 @@ void main()
             float lambert = max(dot(rec.normal, L), 0.0);
 
             // Phong spec
-            vec3 V = normalize(cam.origin - rec.position);
+            vec3 V = normalize(camera.lookFrom - rec.position);
             vec3 R = reflect(-L, rec.normal);
             float specAngle = max(dot(R, V), 0.0);
             float specular  = pow(specAngle, rec.shininess);

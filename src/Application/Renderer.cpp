@@ -4,9 +4,10 @@ Renderer::Renderer() {}
 
 Renderer::~Renderer() { cleanup(); }
 
-void Renderer::init(int width, int height) {
+void Renderer::init(int width, int height, SDL_Window* window) {
     initComputeShader(width, height);
     initRenderShader();
+    m_Scene.init(window, static_cast<float>(width)/static_cast<float>(height), m_ComputeProgram);
 }
 
 void Renderer::cleanup() {
