@@ -115,6 +115,15 @@ struct Camera {
         m_LookAt= m_LookFrom + m_Front;
         updateUniforms();
     }
+
+    inline void moveForward(float delta) {
+        m_LookFrom += delta * m_Front;
+        m_LookAt   += delta * m_Front;
+        m_Front = glm::normalize(m_LookAt - m_LookFrom);
+        m_Right = glm::normalize(glm::cross(m_Front, m_Up));
+        m_Up    = glm::normalize(glm::cross(m_Right, m_Front));
+        updateUniforms();
+    }
 };
 
 #endif

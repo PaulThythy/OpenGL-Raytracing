@@ -218,7 +218,7 @@ void Application::run() {
 void Application::processEvents() {
     SDL_Event event;
 
-    const float cameraSpeed         = 0.1f;
+    const float cameraMoveSpeed     = 0.1f;
     const float cameraRotationSpeed = 0.1f;
 
     while (SDL_PollEvent(&event))
@@ -276,6 +276,13 @@ void Application::processEvents() {
                     m_LastMouseX = currentX;
                     m_LastMouseY = currentY;
                 }
+            }
+            break;
+
+            case SDL_EVENT_MOUSE_WHEEL:
+            {
+                float delta = static_cast<float>(event.wheel.y) * cameraMoveSpeed;
+                m_Renderer.m_Scene.m_Camera.moveForward(delta);
             }
             break;
 
