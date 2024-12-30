@@ -49,7 +49,7 @@ struct HitRecord {
     float t;
     vec3 position;
     vec3 normal;
-    vec3 albedo;
+    Material material;
 };
 
 struct Sphere {
@@ -82,7 +82,7 @@ bool intersectSphere(Ray ray, Sphere sphere, inout HitRecord rec)
         rec.t        = tCandidate;
         rec.position = ray.origin + tCandidate * ray.direction;
         rec.normal   = normalize(rec.position - sphere.center);
-        rec.albedo   = sphere.material.albedo;
+        rec.material.albedo   = sphere.material.albedo;
         return true;
     }
     return false;
@@ -130,7 +130,7 @@ bool intersectTriangle(Ray ray, Triangle tri, inout HitRecord rec)
         rec.t        = tCandidate;
         rec.position = ray.origin + tCandidate * ray.direction;
         rec.normal   = normalize(cross(v0v1, v0v2));
-        rec.albedo   = tri.material.albedo;
+        rec.material.albedo   = tri.material.albedo;
         return true;
     }
     return false;
@@ -164,7 +164,7 @@ bool intersectScene(Ray ray, out HitRecord rec) {
     rec.t      = 1e30;
     rec.position = vec3(0.0);
     rec.normal = vec3(0.0);
-    rec.albedo = vec3(0.0);
+    rec.material.albedo = vec3(0.0);
 
     bool hitAnything = false;
 
@@ -196,7 +196,7 @@ void main()
     
     if (hit)
     {
-        color = vec4(rec.albedo, 1.0);
+        color = vec4(rec.material.albedo, 1.0);
     }
     else 
     {
