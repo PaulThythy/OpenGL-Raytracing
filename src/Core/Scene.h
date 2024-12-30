@@ -44,10 +44,12 @@ struct Scene {
         m_Camera.initUniforms(computeProgram);
         m_Camera.updateUniforms();
 
-        Material sphereMat(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.1f, 0.1f);
+        Material sphere1Mat(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.1f, 0.1f);
+        Material sphere2Mat(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.1f, 0.1f);
         Material planeMat(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.1f, 0.1f);
 
-        m_Spheres.push_back(Sphere(glm::vec3(0.0f, 1.0f, 0.0f), 1.0f, sphereMat));
+        m_Spheres.push_back(Sphere(glm::vec3(0.0f, 1.0f, 0.0f), 1.0f, sphere1Mat));
+        m_Spheres.push_back(Sphere(glm::vec3(2.0f, 0.5f, 0.0f), 0.5f, sphere2Mat));
         initSpheresSSBO();
 
         m_Triangles.push_back(Triangle(glm::vec3(10.0f, 0.0f, 10.0f), glm::vec3(10.0f, 0.0f, -10.0f), glm::vec3(-10.0f, 0.0f, 10.0f), planeMat));
