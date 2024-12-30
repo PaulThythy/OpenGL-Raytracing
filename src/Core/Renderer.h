@@ -4,7 +4,7 @@
 #include <GL/glew.h>
 
 #include "Shader/Shader.h"
-#include "Application/Scene.h"
+#include "Core/Scene.h"
 
 struct Renderer {
 public:
