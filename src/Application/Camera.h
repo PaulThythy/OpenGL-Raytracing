@@ -98,6 +98,23 @@ struct Camera {
         if(m_LocCamRight >= 0)
             glUniform3fv(m_LocCamRight, 1, glm::value_ptr(m_Right));
     }
+
+    inline void rotateAroundUp(float angleDegrees) {
+        glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(angleDegrees), m_Up);
+        m_Front = glm::normalize(glm::vec3(rotation * glm::vec4(m_Front, 1.0f)));
+        m_Right = glm::normalize(glm::cross(m_Front, m_Up));
+        m_Up    = glm::normalize(glm::cross(m_Right, m_Front));
+        m_LookAt = m_LookFrom + m_Front;
+        updateUniforms();
+    }
+
+    inline void rotateAroundRight(float angleDegrees) {
+        glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(angleDegrees), m_Right);
+        m_Front = glm::normalize(glm::vec3(rotation * glm::vec4(m_Front, 1.0f)));
+        m_Up    = glm::normalize(glm::cross(m_Right, m_Front));
+        m_LookAt= m_LookFrom + m_Front;
+        updateUniforms();
+    }
 };
 
 #endif

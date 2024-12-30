@@ -217,6 +217,10 @@ void Application::run() {
 
 void Application::processEvents() {
     SDL_Event event;
+
+    const float cameraSpeed         = 0.1f;
+    const float cameraRotationSpeed = 0.1f;
+
     while (SDL_PollEvent(&event))
     {
         ImGui_ImplSDL3_ProcessEvent(&event);
@@ -233,6 +237,44 @@ void Application::processEvents() {
             {
                 if (event.window.windowID == SDL_GetWindowID(m_Window)) {
                     m_Done = true;
+                }
+            }
+            break;
+
+            case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            {
+                if (event.button.button == SDL_BUTTON_RIGHT) {
+                    m_RightMouseButtonDown = true;
+
+                    SDL_GetMouseState(&m_LastMouseX, &m_LastMouseY);
+                }
+            }
+            break;
+
+            case SDL_EVENT_MOUSE_BUTTON_UP:
+            {
+                if (event.button.button == SDL_BUTTON_RIGHT) {
+                    m_RightMouseButtonDown = false;
+                }
+            }
+            break;
+
+            case SDL_EVENT_MOUSE_MOTION:
+            {
+                if (m_RightMouseButtonDown) {
+                    int currentX = event.motion.x;
+                    int currentY = event.motion.y;
+
+                    float deltaX = static_cast<float>(currentX - m_LastMouseX);
+                    float deltaY = static_cast<float>(currentY - m_LastMouseY);
+
+                    // deltaX corresponds to rotation around Up (Yaw)
+                    // deltaY corresponds to rotation around Right (Pitch)
+                    m_Renderer.m_Scene.m_Camera.rotateAroundUp(-deltaX * cameraRotationSpeed);
+                    m_Renderer.m_Scene.m_Camera.rotateAroundRight(-deltaY * cameraRotationSpeed);
+
+                    m_LastMouseX = currentX;
+                    m_LastMouseY = currentY;
                 }
             }
             break;

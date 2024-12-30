@@ -44,6 +44,11 @@ private:
     bool          m_Done        = false;
     Renderer m_Renderer;
 
+    bool m_RightMouseButtonDown = false;
+
+    float m_LastMouseX          = 0.0f;
+    float m_LastMouseY          = 0.0f;
+
     bool m_ShowDemoWindow       = true;
     bool m_ShowAnotherWindow    = false;
 
