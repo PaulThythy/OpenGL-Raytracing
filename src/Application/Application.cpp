@@ -60,7 +60,7 @@ void Application::setupSDL() {
 
 void Application::initSDL() {
     Uint32 windowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN;
-    m_Window = SDL_CreateWindow("Dear ImGui SDL3+OpenGL3 example",
+    m_Window = SDL_CreateWindow("OpenGL-Raytracer",
                                 1280, 720,
                                 windowFlags);
     if (!m_Window)
@@ -244,8 +244,8 @@ void Application::processEvents() {
                 int newH = event.window.data2;
 
                 m_Renderer.resizeComputeTexture(newW, newH);
-                m_Renderer.m_Scene.m_Camera.m_AspectRatio = static_cast<float>(newW)/static_cast<float>(newH);
-                m_Renderer.m_Scene.updateCameraUniforms();
+                m_Renderer.m_Scene.m_Camera.m_AspectRatio = (float)newW/(float)newH;
+                m_Renderer.m_Scene.m_Camera.updateUniforms();
                 m_Renderer.runComputeShader(newW, newH);
             }
             break;
