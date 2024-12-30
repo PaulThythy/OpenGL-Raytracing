@@ -21,6 +21,10 @@ uniform struct Camera {
     vec3 up;
     float fov;
     float aspectRatio;
+    float nearPlane;
+    float farPlane;
+    vec3 front;
+    vec3 right;
 } camera;
 
 struct Light {

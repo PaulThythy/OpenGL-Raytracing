@@ -21,7 +21,10 @@ struct Scene {
             {0.0, 0.0, 0.0}, 
             {0.0, 1.0, 0.0}, 
             60.0, 
-            aspectRatio);
+            aspectRatio,
+            0.1f,
+            100.0f
+            );
 
         m_Camera.initUniforms(computeProgram);
         m_Camera.updateUniforms();

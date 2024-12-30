@@ -140,7 +140,6 @@ void Application::cleanup()
     SDL_Quit();
 }
 
-
 void Application::run() {
     ImVec4 clearColor(0.45f, 0.55f, 0.60f, 1.00f);
     while (!m_Done)
