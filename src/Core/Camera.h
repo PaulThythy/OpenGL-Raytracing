@@ -31,19 +31,19 @@ struct Camera {
     glm::vec3 m_Front;
     glm::vec3 m_Right;
 
-    GLint m_LocCamLookFrom  = -1;
-    GLint m_LocCamLookAt    = -1;
-    GLint m_LocCamUp        = -1;
-    GLint m_LocCamFov       = -1;
-    GLint m_LocCamAspect    = -1;
-    GLint m_LocCamNearPlane = -1;
-    GLint m_LocCamFarPlane  = -1;
-    GLint m_LocCamFront     = -1;
-    GLint m_LocCamRight     = -1;
+    GLuint m_LocCamLookFrom  = -1;
+    GLuint m_LocCamLookAt    = -1;
+    GLuint m_LocCamUp        = -1;
+    GLuint m_LocCamFov       = -1;
+    GLuint m_LocCamAspect    = -1;
+    GLuint m_LocCamNearPlane = -1;
+    GLuint m_LocCamFarPlane  = -1;
+    GLuint m_LocCamFront     = -1;
+    GLuint m_LocCamRight     = -1;
 
     GLuint m_ComputeProgram = 0; 
 
-    inline void initUniforms(GLint computeProgram) {
+    inline void initUniforms(GLuint computeProgram) {
         m_ComputeProgram = computeProgram;
 
         glUseProgram(m_ComputeProgram);

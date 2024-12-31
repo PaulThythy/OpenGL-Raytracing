@@ -10,6 +10,7 @@
 #include <iostream>
 
 #include "Camera.h"
+#include "globals/Globals.h"
 #include "math/Sphere.h"
 #include "math/Triangle.h"
 #include "math/Light.h"
@@ -44,6 +45,8 @@ struct Scene {
         m_Camera.initUniforms(computeProgram);
         m_Camera.updateUniforms();
 
+        initConstUniforms(computeProgram);
+
         Material sphere1Mat(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.1f, 0.1f);
         Material sphere2Mat(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.1f, 0.1f);
         Material planeMat(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.1f, 0.1f);
@@ -58,6 +61,47 @@ struct Scene {
 
         m_Lights.push_back(Light(glm::vec3(1.0f, 3.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0));
         initLightsSSBO();
+    }
+
+    inline void initConstUniforms(GLuint computeProgram) {
+        glUseProgram(computeProgram);
+
+        GLint samplesLoc = glGetUniformLocation(computeProgram, "SAMPLES");
+        GLint bouncesLoc = glGetUniformLocation(computeProgram, "BOUNCES");
+
+        std::cout << samplesLoc << std::endl;
+        std::cout << bouncesLoc << std::endl;
+
+        if (samplesLoc == -1) {
+            std::cerr << "Warning: 'SAMPLES' uniform not found.\n";
+        } else {
+            glUniform1i(samplesLoc, Config::SAMPLES);
+        }
+
+        if (bouncesLoc == -1) {
+            std::cerr << "Warning: 'BOUNCES' uniform not found.\n";
+        } else {
+            glUniform1i(bouncesLoc, Config::BOUNCES);
+        }
+
+        glUseProgram(0);
+    }
+
+    inline void updateConstUniforms(GLuint computeProgram) {
+        glUseProgram(computeProgram);
+
+        GLint samplesLoc = glGetUniformLocation(computeProgram, "SAMPLES");
+        GLint bouncesLoc = glGetUniformLocation(computeProgram, "BOUNCES");
+
+        if (samplesLoc != -1) {
+            glUniform1i(samplesLoc, Config::SAMPLES);
+        }
+
+        if (bouncesLoc != -1) {
+            glUniform1i(bouncesLoc, Config::BOUNCES);
+        }
+
+        glUseProgram(0);
     }
 
     inline void initSpheresSSBO() {
@@ -97,7 +141,7 @@ struct Scene {
 
     inline void updateLightsSSBO() {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_LightsSSBO);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, m_Lights.size() * sizeof(Triangle), m_Lights.data(), GL_STATIC_DRAW);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, m_Lights.size() * sizeof(Light), m_Lights.data(), GL_STATIC_DRAW);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, m_LightsSSBO);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }

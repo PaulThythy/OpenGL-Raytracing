@@ -1,4 +1,5 @@
 #include "Application.h"
+#include "globals/Globals.h"
 
 Application::Application() {
     setupSDL();
@@ -61,7 +62,7 @@ void Application::setupSDL() {
 void Application::initSDL() {
     Uint32 windowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN;
     m_Window = SDL_CreateWindow("OpenGL-Raytracer",
-                                1280, 720,
+                                Config::INIT_WINDOW_WIDTH, Config::INIT_WINDOW_HEIGHT,
                                 windowFlags);
     if (!m_Window)
     {

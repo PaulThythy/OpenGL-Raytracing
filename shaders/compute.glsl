@@ -1,5 +1,10 @@
 #version 450
 
+#define PI 3.141592653589793238462643
+
+uniform int SAMPLES;
+uniform int BOUNCES;
+
 layout (local_size_x = 16, local_size_y = 16) in;
 layout (rgba32f, binding = 0) uniform image2D outputImage;
 
@@ -7,7 +12,7 @@ const float EPSILON = 1e-6;
 
 float radians(float deg)
 {
-    return deg * 3.14159265359 / 180.0;
+    return deg * PI / 180.0;
 }
 
 struct Material {
