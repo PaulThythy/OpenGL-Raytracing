@@ -1,7 +1,7 @@
 #version 450
 
 #define PI 3.141592653589793238462643
-#define MAX_BOUNCES 10
+#define MAX_BOUNCES 50
 
 uniform int SAMPLES;
 uniform int BOUNCES;
@@ -324,17 +324,21 @@ void main()
                     }
                 }
 
-                vec3 randomDir = sampleHemisphere(N, float(sampleIndex * BOUNCES + bounce), uv);
+                vec3 scatterDir = sampleHemisphere(N, float(sampleIndex * BOUNCES + bounce), uv);
 
-                ray.origin = hitRecord.position + N * 0.001;
-                ray.direction = randomDir;
+                vec3 BRDF = computeBRDF(hitRecord.material, N, V, scatterDir);
 
-                float NdotRandomDir = max(dot(N, randomDir), 0.0);
-                float pdf = NdotRandomDir / PI;
+                float NdotScatterDir = max(dot(N, scatterDir), 0.0);
+                float pdf = NdotScatterDir / PI;
 
-                vec3 BRDF = computeBRDF(hitRecord.material, N, V, randomDir);
+                throughput *= BRDF * NdotScatterDir / pdf;
 
-                throughput *= BRDF * NdotRandomDir / pdf;
+                ray.origin = hitRecord.position + N * EPSILON;
+                ray.direction = scatterDir;
+
+                if(length(throughput) < 0.001)
+                    break;
+
             } else {
                 break;
             }
