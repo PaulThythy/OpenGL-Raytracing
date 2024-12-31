@@ -47,9 +47,9 @@ struct Scene {
 
         initConstUniforms(computeProgram);
 
-        Material sphere1Mat(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.1f, 0.1f);
-        Material sphere2Mat(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.1f, 0.1f);
-        Material planeMat(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.1f, 0.1f);
+        Material sphere1Mat(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.5f, 0.0f);
+        Material sphere2Mat(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.1f, 0.1f);
+        Material planeMat(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.1f, 0.1f);
 
         m_Spheres.push_back(Sphere(glm::vec3(0.0f, 1.0f, 0.0f), 1.0f, sphere1Mat));
         m_Spheres.push_back(Sphere(glm::vec3(2.0f, 0.5f, 0.0f), 0.5f, sphere2Mat));
@@ -68,9 +68,6 @@ struct Scene {
 
         GLint samplesLoc = glGetUniformLocation(computeProgram, "SAMPLES");
         GLint bouncesLoc = glGetUniformLocation(computeProgram, "BOUNCES");
-
-        std::cout << samplesLoc << std::endl;
-        std::cout << bouncesLoc << std::endl;
 
         if (samplesLoc == -1) {
             std::cerr << "Warning: 'SAMPLES' uniform not found.\n";

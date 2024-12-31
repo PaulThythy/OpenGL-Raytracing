@@ -1,6 +1,7 @@
 #version 450
 
 #define PI 3.141592653589793238462643
+#define MAX_BOUNCES 10
 
 uniform int SAMPLES;
 uniform int BOUNCES;
@@ -10,8 +11,7 @@ layout (rgba32f, binding = 0) uniform image2D outputImage;
 
 const float EPSILON = 1e-6;
 
-float radians(float deg)
-{
+float radians(float deg) {
     return deg * PI / 180.0;
 }
 
@@ -171,58 +171,179 @@ Ray getCameraRay(float u, float v)
     return r;
 }
 
-bool intersectScene(Ray ray, out HitRecord rec) {
-    rec.t      = 1e30;
-    rec.position = vec3(0.0);
-    rec.normal = vec3(0.0);
-    rec.material.albedo = vec3(0.0);
-    rec.material.emission = vec3(0.0);
-    rec.material.emissionStrength = 0.0;
-    rec.material.roughness = 0.0;
-    rec.material.metallic = 0.0;
+vec3 sampleHemisphere(vec3 N, float seed, vec2 uv) {
+    float Xi1 = rand(uv * vec2(12.9898, 78.233) + vec2(sin(seed), cos(seed)), seed);
+    float Xi2 = rand(uv * vec2(78.233, 12.9898) + vec2(cos(seed), sin(seed)), seed + 1.0);
 
-    bool hitAnything = false;
+    float theta = acos(sqrt(1.0 - Xi1));
+    float phi = 2.0 * PI * Xi2;
 
-    for (int i = 0; i < SpheresBuffer.spheres.length(); i++) {
-        if (intersectSphere(ray, SpheresBuffer.spheres[i], rec)) {
-            hitAnything = true;
+    float xs = sin(theta) * cos(phi);
+    float ys = cos(theta);
+    float zs = sin(theta) * sin(phi);
+
+    vec3 up = abs(N.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
+    vec3 tangentX = normalize(cross(up, N));
+    vec3 tangentY = cross(N, tangentX);
+
+    vec3 direction = tangentX * xs + tangentY * zs + N * ys;
+    return normalize(direction);
+}
+
+vec3 fresnelSchlick(float cosTheta, vec3 F0) {
+    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
+float DistributionGGX(vec3 N, vec3 H, float roughness) {
+    float a      = roughness * roughness;
+    float a2     = a * a;
+    float NdotH  = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH * NdotH;
+
+    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom = PI * denom * denom;
+
+    return a2 / denom;
+}
+
+float GeometrySchlickGGX(float NdotV, float roughness) {
+    float r = roughness + 1.0;
+    float k = (r * r) / 8.0;
+
+    float denom = NdotV * (1.0 - k) + k;
+
+    return NdotV / denom;
+}
+
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    float ggx2  = GeometrySchlickGGX(NdotV, roughness);
+    float ggx1  = GeometrySchlickGGX(NdotL, roughness);
+
+    return ggx1 * ggx2;
+}
+
+vec3 computeBRDF(Material material, vec3 N, vec3 V, vec3 L) {
+    vec3 H = normalize(V + L);
+
+    float NdotL = max(dot(N, L), 0.0);
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotH = max(dot(N, H), 0.0);
+    float VdotH = max(dot(V, H), 0.0);
+
+    vec3 F0 = mix(vec3(0.04), material.albedo, material.metallic);
+    vec3 F = fresnelSchlick(VdotH, F0);
+
+    float D = DistributionGGX(N, H, material.roughness);
+    float G = GeometrySmith(N, V, L, material.roughness);
+
+    vec3 numerator = D * F * G;
+    float denominator = 4.0 * NdotV * NdotL + 0.001;
+    vec3 specular = numerator / denominator;
+
+    vec3 kD = vec3(1.0) - F;
+    kD *= 1.0 - material.metallic;
+
+    vec3 diffuse = kD * material.albedo / PI;
+
+    return diffuse + specular;
+}
+
+bool traceRay(Ray ray, out HitRecord hitRecord) {
+    hitRecord.t      = 1e20;
+    hitRecord.position = vec3(0.0);
+    hitRecord.normal = vec3(0.0);
+    hitRecord.material.albedo = vec3(0.0);
+    hitRecord.material.emission = vec3(0.0);
+    hitRecord.material.emissionStrength = 0.0;
+    hitRecord.material.roughness = 0.0;
+    hitRecord.material.metallic = 0.0;
+
+    bool hitSomething = false;
+
+    for (int i = 0; i < SpheresBuffer.spheres.length(); ++i) {
+        if (intersectSphere(ray, SpheresBuffer.spheres[i], hitRecord)) {
+            hitSomething = true;
         }
     }
 
-    for (int i = 0; i < TrianglesBuffer.triangles.length(); i++) {
-        if (intersectTriangle(ray, TrianglesBuffer.triangles[i], rec)) {
-            hitAnything = true;
+    for (int i = 0; i < TrianglesBuffer.triangles.length(); ++i) {
+        if (intersectTriangle(ray, TrianglesBuffer.triangles[i], hitRecord)) { // Appel correct avec HitRecord
+            hitSomething = true;
         }
     }
 
-    return hitAnything;
+    return hitSomething;
 }
 
 void main() 
 {
-    ivec2 pixelCoord    = ivec2(gl_GlobalInvocationID.xy);
-    vec2 imgSize        = vec2(imageSize(outputImage));
-    
-    float offsetX = rand(vec2(pixelCoord), 0.0);
-    float offsetY = rand(vec2(pixelCoord), 1.0);
-    vec2 randOffset = vec2(offsetX, offsetY);
-    
-    vec2 uv = (vec2(pixelCoord) + randOffset) / imgSize;  
-    
-    Ray ray = getCameraRay(uv.x, uv.y);
+    ivec2 pixelCoord = ivec2(gl_GlobalInvocationID.xy);
+    vec2 imgSize = vec2(imageSize(outputImage));
+    vec3 color = vec3(0.0);
 
-    HitRecord rec;
-    bool hit = intersectScene(ray, rec);
-    vec4 color = vec4(0.0);
-    
-    if (hit)
-    {
-        color = vec4(rec.material.albedo, 1.0);
-    }
-    else 
-    {
-        color = vec4(0.0, 0.0, 0.0, 1.0);
+    for(int sampleIndex = 0; sampleIndex < SAMPLES; ++sampleIndex) {
+        float offsetX = rand(vec2(pixelCoord), 0.0);
+        float offsetY = rand(vec2(pixelCoord), 1.0);
+        vec2 randOffset = vec2(offsetX, offsetY);
+        vec2 uv = (vec2(pixelCoord) + randOffset) / imgSize;
+
+        Ray ray = getCameraRay(uv.x, uv.y); 
+
+        vec3 throughput = vec3(1.0);
+
+        for(int bounce = 0; bounce < BOUNCES && bounce < MAX_BOUNCES; ++bounce) {
+            HitRecord hitRecord;
+
+            if(traceRay(ray, hitRecord)) {
+                color += throughput * hitRecord.material.emission * hitRecord.material.emissionStrength;
+
+                vec3 N = normalize(hitRecord.normal);
+                vec3 V = normalize(-ray.direction);
+
+                int numLights = LightsBuffer.lights.length();
+                for(int i = 0; i < numLights; ++i) {
+                    Light light = LightsBuffer.lights[i];
+                    vec3 L = normalize(light.position - hitRecord.position);
+                    float distance = length(light.position - hitRecord.position);
+                    float attenuation = 1.0 / (distance * distance);
+
+                    Ray shadowRay;
+                    shadowRay.origin = hitRecord.position + N * 0.001;
+                    shadowRay.direction = L;
+
+                    HitRecord shadowHit;
+                    if(!traceRay(shadowRay, shadowHit) || length(shadowHit.position - hitRecord.position) > distance) {
+                        vec3 BRDF = computeBRDF(hitRecord.material, N, V, L);
+
+                        float NdotL = max(dot(N, L), 0.0);
+
+                        vec3 radiance = light.color * light.power * attenuation;
+                        color += throughput * BRDF * radiance * NdotL;
+                    }
+                }
+
+                vec3 randomDir = sampleHemisphere(N, float(sampleIndex * BOUNCES + bounce), uv);
+
+                ray.origin = hitRecord.position + N * 0.001;
+                ray.direction = randomDir;
+
+                float NdotRandomDir = max(dot(N, randomDir), 0.0);
+                float pdf = NdotRandomDir / PI;
+
+                vec3 BRDF = computeBRDF(hitRecord.material, N, V, randomDir);
+
+                throughput *= BRDF * NdotRandomDir / pdf;
+            } else {
+                break;
+            }
+        }
     }
 
-    imageStore(outputImage, pixelCoord, color);
+    color /= float(SAMPLES);
+    color = pow(color, vec3(1.0 / 2.6));
+    vec4 outColor = vec4(color, 1.0);
+
+    imageStore(outputImage, pixelCoord, outColor);
 }
