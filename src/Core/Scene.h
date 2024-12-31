@@ -105,13 +105,13 @@ struct Scene {
         glGenBuffers(1, &m_SpheresSSBO);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_SpheresSSBO);
         glBufferData(GL_SHADER_STORAGE_BUFFER, m_Spheres.size() * sizeof(Sphere), m_Spheres.data(), GL_STATIC_DRAW);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_SpheresSSBO);       //binding 1
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, m_SpheresSSBO);       //binding 2
     }
 
     inline void updateSpheresSSBO() {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_SpheresSSBO);
         glBufferData(GL_SHADER_STORAGE_BUFFER, m_Spheres.size() * sizeof(Sphere), m_Spheres.data(), GL_STATIC_DRAW);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_SpheresSSBO);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, m_SpheresSSBO);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
@@ -119,13 +119,13 @@ struct Scene {
         glGenBuffers(1, &m_TrianglesSSBO);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_TrianglesSSBO);
         glBufferData(GL_SHADER_STORAGE_BUFFER, m_Triangles.size() * sizeof(Triangle), m_Triangles.data(), GL_STATIC_DRAW);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, m_TrianglesSSBO);       //binding 2
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, m_TrianglesSSBO);       //binding 3
     }
 
     inline void updateTrianglesSSBO() {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_TrianglesSSBO);
         glBufferData(GL_SHADER_STORAGE_BUFFER, m_Triangles.size() * sizeof(Triangle), m_Triangles.data(), GL_STATIC_DRAW);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, m_TrianglesSSBO);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, m_TrianglesSSBO);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
@@ -133,13 +133,13 @@ struct Scene {
         glGenBuffers(1, &m_LightsSSBO);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_LightsSSBO);
         glBufferData(GL_SHADER_STORAGE_BUFFER, m_Lights.size() * sizeof(Light), m_Lights.data(), GL_STATIC_DRAW);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, m_LightsSSBO);        //binding 3
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, m_LightsSSBO);        //binding 4
     }
 
     inline void updateLightsSSBO() {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_LightsSSBO);
         glBufferData(GL_SHADER_STORAGE_BUFFER, m_Lights.size() * sizeof(Light), m_Lights.data(), GL_STATIC_DRAW);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, m_LightsSSBO);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, m_LightsSSBO);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 };

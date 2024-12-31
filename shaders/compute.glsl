@@ -8,6 +8,7 @@ uniform int BOUNCES;
 
 layout (local_size_x = 16, local_size_y = 16) in;
 layout (rgba32f, binding = 0) uniform image2D outputImage;
+layout (rgba32f, binding = 1) uniform image2D accumImage;
 
 const float EPSILON = 1e-6;
 
@@ -51,7 +52,7 @@ struct Light {
     float power;
 };
 
-layout(std430, binding = 3) buffer LightsBlock {
+layout(std430, binding = 4) buffer LightsBlock {
     Light lights[];
 } LightsBuffer;
 
@@ -68,7 +69,7 @@ struct Sphere {
     Material material;
 };
 
-layout(std430, binding = 1) buffer SpheresBlock {
+layout(std430, binding = 2) buffer SpheresBlock {
     Sphere spheres[];
 } SpheresBuffer;
 
@@ -108,7 +109,7 @@ struct Triangle {
     Material material;
 };
 
-layout(std430, binding = 2) buffer TrianglesBlock {
+layout(std430, binding = 3) buffer TrianglesBlock {
     Triangle triangles[];
 } TrianglesBuffer;
 
