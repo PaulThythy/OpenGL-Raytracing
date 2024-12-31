@@ -187,8 +187,6 @@ void Renderer::runComputeShader(int width, int height)
         m_FrameCount += 1;
     }
 
-    std::cout << m_FrameCount << std::endl;
-
     // 1) Activate compute shader
     glUseProgram(m_ComputeProgram);
 

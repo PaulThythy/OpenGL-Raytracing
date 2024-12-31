@@ -33,7 +33,7 @@ struct Scene {
 
     inline void init(SDL_Window* window, float aspectRatio, GLuint computeProgram) {
         m_Camera = Camera(
-            {4.0, 4.0, 4.0}, 
+            {0.0, 2.5, 7.0}, 
             {0.0, 0.0, 0.0}, 
             {0.0, 1.0, 0.0}, 
             60.0, 
@@ -47,20 +47,39 @@ struct Scene {
 
         initConstUniforms(computeProgram);
 
-        Material sphere1Mat(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.5f, 0.0f);
-        Material sphere2Mat(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.1f, 0.1f);
-        Material planeMat(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.1f, 0.1f);
+        Material redWall(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.5f, 0.0f);
+        Material greenWall(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.5f, 0.0f);
+        Material whiteWall(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.5f, 0.0f);
+        Material emissiveCeiling(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.7f, 0.0f, 0.0f);
 
-        m_Spheres.push_back(Sphere(glm::vec3(0.0f, 1.0f, 0.0f), 1.0f, sphere1Mat));
-        m_Spheres.push_back(Sphere(glm::vec3(2.0f, 0.5f, 0.0f), 0.5f, sphere2Mat));
-        initSpheresSSBO();
+        Triangle redWall1(glm::vec3(-5.0f, 5.0f, -5.0f), glm::vec3(-5.0f, 5.0f, 5.0f), glm::vec3(-5.0f, 0.0f, -5.0f), redWall); 
+        Triangle redWall2(glm::vec3(-5.0f, 5.0f, 5.0f), glm::vec3(-5.0f, 0.0f, 5.0f), glm::vec3(-5.0f, 0.0f, -5.0f), redWall);
+        m_Triangles.push_back(redWall1); m_Triangles.push_back(redWall2);
 
-        m_Triangles.push_back(Triangle(glm::vec3(10.0f, 0.0f, 10.0f), glm::vec3(10.0f, 0.0f, -10.0f), glm::vec3(-10.0f, 0.0f, 10.0f), planeMat));
-        m_Triangles.push_back(Triangle(glm::vec3(-10.0f, 0.0f, 10.0f), glm::vec3(10.0f, 0.0f, -10.0f), glm::vec3(-10.0f, 0.0f, -10.0f), planeMat));
-        initTrianglesSSBO();
+        Triangle greenWall1(glm::vec3(5.0f, 5.0f, -5.0f), glm::vec3(5.0f, 0.0f, -5.0f), glm::vec3(5.0f, 5.0f, 5.0f), greenWall); 
+        Triangle greenWall2(glm::vec3(5.0f, 5.0f, 5.0f), glm::vec3(5.0f, 0.0f, -5.0f), glm::vec3(5.0f, 0.0f, 5.0f), greenWall);
+        m_Triangles.push_back(greenWall1); m_Triangles.push_back(greenWall2);
 
-        m_Lights.push_back(Light(glm::vec3(1.0f, 3.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0));
-        initLightsSSBO();
+        Triangle backWall1(glm::vec3(-5.0f, 5.0f, -5.0f), glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(5.0f, 5.0f, -5.0f), whiteWall);
+        Triangle backWall2(glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(5.0f, 0.0f, -5.0f), glm::vec3(5.0f, 5.0f, -5.0f), whiteWall);
+        m_Triangles.push_back(backWall1); m_Triangles.push_back(backWall2);
+
+        Triangle ground1(glm::vec3(5.0f, 0.0f, -5.0f), glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(-5.0f, 0.0f, 5.0f), whiteWall);
+        Triangle ground2(glm::vec3(-5.0f, 0.0f, 5.0f), glm::vec3(5.0f, 0.0f, 5.0f), glm::vec3(5.0f, 0.0f, -5.0f), whiteWall);
+        m_Triangles.push_back(ground1); m_Triangles.push_back(ground2);
+
+        Triangle ceiling1(glm::vec3(-5.0f, 5.0f, -5.0f), glm::vec3(5.0f, 5.0f, 5.0f), glm::vec3(-5.0f, 5.0f, 5.0f), whiteWall);
+        Triangle ceiling2(glm::vec3(-5.0f, 5.0f, -5.0f), glm::vec3(5.0f, 5.0f, -5.0f), glm::vec3(5.0f, 5.0f, 5.0f), whiteWall);
+        m_Triangles.push_back(ceiling1); m_Triangles.push_back(ceiling2);
+
+        Triangle emissiveCeiling1(glm::vec3(-5.0f/2.0f, 4.9f, -5.0f/2.0f), glm::vec3(5.0f/2.0f, 4.9f, 5.0f/2.0f), glm::vec3(-5.0f/2.0f, 4.9f, 5.0f/2.0f), emissiveCeiling);
+        Triangle emissiveCeiling2(glm::vec3(-5.0f/2.0f, 4.9f, -5.0f/2.0f), glm::vec3(5.0f/2.0f, 4.9f, -5.0f/2.0f), glm::vec3(5.0f/2.0f, 4.9f, 5.0f/2.0f), emissiveCeiling);
+        m_Triangles.push_back(emissiveCeiling1); m_Triangles.push_back(emissiveCeiling2);
+
+        initTrianglesSSBO();        
+
+        //m_Lights.push_back(Light(glm::vec3(1.0f, 3.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 10.0));
+        //initLightsSSBO();
     }
 
     inline void initConstUniforms(GLuint computeProgram) {
