@@ -6,6 +6,8 @@
 uniform int SAMPLES;
 uniform int BOUNCES;
 
+uniform int uFrameCount;
+
 layout (local_size_x = 16, local_size_y = 16) in;
 layout (rgba32f, binding = 0) uniform image2D outputImage;
 layout (rgba32f, binding = 1) uniform image2D accumImage;
@@ -285,8 +287,9 @@ void main()
     vec3 color = vec3(0.0);
 
     for(int sampleIndex = 0; sampleIndex < SAMPLES; ++sampleIndex) {
-        float offsetX = rand(vec2(pixelCoord), 0.0);
-        float offsetY = rand(vec2(pixelCoord), 1.0);
+        float seed = float(uFrameCount) + float(pixelCoord.x) / imgSize.x + float(pixelCoord.y) / imgSize.y;
+        float offsetX = rand(vec2(pixelCoord), seed);
+        float offsetY = rand(vec2(pixelCoord), seed+1.0);
         vec2 randOffset = vec2(offsetX, offsetY);
         vec2 uv = (vec2(pixelCoord) + randOffset) / imgSize;
 
@@ -347,8 +350,15 @@ void main()
     }
 
     color /= float(SAMPLES);
+    
+    //  gamma correction
     color = pow(color, vec3(1.0 / 2.6));
-    vec4 outColor = vec4(color, 1.0);
 
-    imageStore(outputImage, pixelCoord, outColor);
+    vec4 accumColor = imageLoad(accumImage, pixelCoord);
+
+    // new accumulated color
+    accumColor.rgb = (accumColor.rgb * float(uFrameCount - 1) + color.rgb) / float(uFrameCount);
+    accumColor.a = 1.0;
+
+    imageStore(accumImage, pixelCoord, accumColor);
 }

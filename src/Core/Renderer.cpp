@@ -19,9 +19,9 @@ void Renderer::cleanup() {
         glDeleteProgram(m_RenderProgram);
         m_RenderProgram = 0;
     }
-    if (m_ComputeTexture) {
-        glDeleteTextures(1, &m_ComputeTexture);
-        m_ComputeTexture = 0;
+    if (m_CurrentTexture) {
+        glDeleteTextures(1, &m_CurrentTexture);
+        m_CurrentTexture = 0;
     }
     if (m_QuadVBO) {
         glDeleteBuffers(1, &m_QuadVBO);
@@ -43,13 +43,13 @@ void Renderer::initComputeShader(int width, int height) {
     }
 
     // 2) Create a texture that the compute shader will fill.
-    glGenTextures(1, &m_ComputeTexture);
-    glBindTexture(GL_TEXTURE_2D, m_ComputeTexture);
+    glGenTextures(1, &m_CurrentTexture);
+    glBindTexture(GL_TEXTURE_2D, m_CurrentTexture);
     glTexImage2D(
         GL_TEXTURE_2D,      // target
         0,                  // level
         GL_RGBA32F,         // internal format
-        width, height,               // width, height
+        width, height,      // width, height
         0,                  // border
         GL_RGBA,            // px format
         GL_FLOAT,           // type
@@ -62,11 +62,43 @@ void Renderer::initComputeShader(int width, int height) {
     // 3) Specify that this texture can be written as an image in the compute shader
     glBindImageTexture(
         0,                      // unit = 0
-        m_ComputeTexture,
+        m_CurrentTexture,
         0,                      // level
         GL_FALSE,               // layered
         0,                      // layer
         GL_WRITE_ONLY,          // access
+        GL_RGBA32F              // format
+    );
+
+    // 4) Create accumulation texture
+    glGenTextures(1, &m_AccumTexture);
+    glBindTexture(GL_TEXTURE_2D, m_AccumTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,      // target
+        0,                  // level
+        GL_RGBA32F,         // internal format
+        width, height,      // width, height
+        0,                  // border
+        GL_RGBA,            // px format
+        GL_FLOAT,           // type
+        nullptr             // data
+    );
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Init accumulation texture to 0
+    std::vector<float> zeroData(width * height * 4, 0.0f);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, zeroData.data());
+
+    // 5) Specify that this texture can be read and written as an image in the compute shader
+    glBindImageTexture(
+        1,                      // unit = 1
+        m_AccumTexture,
+        0,                      // level
+        GL_FALSE,               // layered
+        0,                      // layer
+        GL_READ_WRITE,          // access
         GL_RGBA32F              // format
     );
 
@@ -147,8 +179,23 @@ void Renderer::runComputeShader(int width, int height)
         return;
     }
 
+    //reset accumulation if camera moves
+    if (m_CameraMoved) {
+        resetAccumulation(width, height);
+        m_CameraMoved = false;
+    } else {
+        m_FrameCount += 1;
+    }
+
+    std::cout << m_FrameCount << std::endl;
+
     // 1) Activate compute shader
     glUseProgram(m_ComputeProgram);
+
+    GLint frameCountLoc = glGetUniformLocation(m_ComputeProgram, "uFrameCount");
+    if (frameCountLoc != -1) {
+        glUniform1i(frameCountLoc, m_FrameCount);
+    }
 
     // Calculate the number of groups (16x16) covering w,h
     int groupX = (width + 16 - 1) / 16;
@@ -162,7 +209,7 @@ void Renderer::runComputeShader(int width, int height)
     // 4) Deactivate program
     glUseProgram(0);
 
-    // At this point, m_ComputeTexture contains the result of the compute shader
+    // At this point, m_CurrentTexture contains the result of the compute shader
     // We could now render (a quad fullscreen) by reading this texture
     // using a conventional vertex+fragment shader.
 }
@@ -172,7 +219,7 @@ void Renderer::renderFullscreenQuad()
     glUseProgram(m_RenderProgram);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_ComputeTexture);
+    glBindTexture(GL_TEXTURE_2D, m_AccumTexture);
 
     GLint loc = glGetUniformLocation(m_RenderProgram, "uTexture");
     if (loc >= 0)
@@ -188,12 +235,12 @@ void Renderer::renderFullscreenQuad()
 
 void Renderer::resizeComputeTexture(int width, int height)
 {
-    if (m_ComputeTexture) {
-        glDeleteTextures(1, &m_ComputeTexture);
-        m_ComputeTexture = 0;
+    if (m_CurrentTexture) {
+        glDeleteTextures(1, &m_CurrentTexture);
+        m_CurrentTexture = 0;
     }
-    glGenTextures(1, &m_ComputeTexture);
-    glBindTexture(GL_TEXTURE_2D, m_ComputeTexture);
+    glGenTextures(1, &m_CurrentTexture);
+    glBindTexture(GL_TEXTURE_2D, m_CurrentTexture);
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
@@ -209,12 +256,55 @@ void Renderer::resizeComputeTexture(int width, int height)
 
     glBindImageTexture(
         0,
-        m_ComputeTexture,
+        m_CurrentTexture,
         0,
         GL_FALSE,
         0,
         GL_WRITE_ONLY,
         GL_RGBA32F
     );
+
+    // Reinit accumulation texture
+    if (m_AccumTexture) {
+        glDeleteTextures(1, &m_AccumTexture);
+        m_AccumTexture = 0;
+    }
+    glGenTextures(1, &m_AccumTexture);
+    glBindTexture(GL_TEXTURE_2D, m_AccumTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA32F,
+        width, height,
+        0,
+        GL_RGBA,
+        GL_FLOAT,
+        nullptr
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    std::vector<float> zeroData(width * height * 4, 0.0f);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, zeroData.data());
+
+    glBindImageTexture(
+        1,
+        m_AccumTexture,
+        0,
+        GL_FALSE,
+        0,
+        GL_READ_WRITE,
+        GL_RGBA32F
+    );
+
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Renderer::resetAccumulation(int width, int height) {
+    glBindTexture(GL_TEXTURE_2D, m_AccumTexture);
+    std::vector<float> zeroData(width * height * 4, 0.0f);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, zeroData.data());
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    m_FrameCount = 1;
 }

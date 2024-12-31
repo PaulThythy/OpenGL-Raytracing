@@ -17,6 +17,7 @@ public:
     void runComputeShader(int windowWidth, int windowHeight);
     void renderFullscreenQuad();
     void resizeComputeTexture(int windowWidth, int windowHeight);
+    void resetAccumulation(int windowWidth, int windowHeight);
 
     void initComputeShader(int windowWidth, int windowHeight);
     void initRenderShader();
@@ -24,12 +25,16 @@ public:
     GLuint m_ComputeProgram     = 0;
     GLuint m_RenderProgram      = 0;
 
-    GLuint m_ComputeTexture     = 0;
+    GLuint m_CurrentTexture     = 0;
+    GLuint m_AccumTexture       = 0;
 
     GLuint m_QuadVAO            = 0;
     GLuint m_QuadVBO            = 0;
 
     Scene m_Scene;
+
+    int m_FrameCount            = 1;
+    bool m_CameraMoved          = false;
 };
 
 #endif

@@ -263,6 +263,8 @@ void Application::processEvents() {
             case SDL_EVENT_MOUSE_MOTION:
             {
                 if (m_RightMouseButtonDown) {
+                    m_Renderer.m_CameraMoved = true;
+
                     int currentX = event.motion.x;
                     int currentY = event.motion.y;
 
@@ -282,6 +284,8 @@ void Application::processEvents() {
 
             case SDL_EVENT_MOUSE_WHEEL:
             {
+                m_Renderer.m_CameraMoved = true;
+
                 float delta = static_cast<float>(event.wheel.y) * cameraMoveSpeed;
                 m_Renderer.m_Scene.m_Camera.moveForward(delta);
             }
