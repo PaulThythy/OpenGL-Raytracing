@@ -13,10 +13,10 @@ struct Camera {
                     float nearPlane, float farPlane
                 ): m_LookFrom(lookFrom), m_LookAt(lookAt), m_Up(up), m_Fov(fov), m_AspectRatio(aspectRatio), m_NearPlane(nearPlane), m_FarPlane(farPlane)
     {
-        this->m_Front = glm::normalize(this->m_LookAt - this->m_LookFrom);
-        this->m_Right = glm::normalize(glm::cross(this->m_Front, this->m_Up));
+        m_Front = glm::normalize(m_LookAt - m_LookFrom);
+        m_Right = glm::normalize(glm::cross(m_Front, m_Up));
         //to ensure that it is orthogonal to Front and Right
-        this->m_Up = glm::normalize(glm::cross(this->m_Right, this->m_Front));
+        m_Up = glm::normalize(glm::cross(m_Right, m_Front));
     }
     
     inline ~Camera() {}

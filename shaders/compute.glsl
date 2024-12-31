@@ -15,6 +15,11 @@ float radians(float deg)
     return deg * PI / 180.0;
 }
 
+// From https://github.com/asc-community/MxEngine
+float rand(vec2 co, float seed) {
+    return fract(sin(dot(co.xy + seed, vec2(12.9898, 78.233))) * 43758.5453123);
+}
+
 struct Material {
     vec3 albedo;
     vec3 emission;
@@ -78,8 +83,11 @@ bool intersectSphere(Ray ray, Sphere sphere, inout HitRecord rec)
     if (discriminant < 0.0)
         return false;
 
-    float tCandidate = (-b - sqrt(discriminant)) / (2.0 * a);
-    if (tCandidate < 0.0)
+    float sqrtDisc = sqrt(discriminant);
+    float tCandidate = (-b - sqrtDisc) / (2.0 * a);
+    if (tCandidate < EPSILON)
+        tCandidate = (-b + sqrtDisc) / (2.0 * a);
+    if (tCandidate < EPSILON)
         return false;
 
     if (tCandidate < rec.t)
@@ -87,12 +95,11 @@ bool intersectSphere(Ray ray, Sphere sphere, inout HitRecord rec)
         rec.t        = tCandidate;
         rec.position = ray.origin + tCandidate * ray.direction;
         rec.normal   = normalize(rec.position - sphere.center);
-        rec.material.albedo   = sphere.material.albedo;
+        rec.material = sphere.material;
         return true;
     }
     return false;
 }
-
 
 struct Triangle {
     vec3 v0;
@@ -135,22 +142,21 @@ bool intersectTriangle(Ray ray, Triangle tri, inout HitRecord rec)
         rec.t        = tCandidate;
         rec.position = ray.origin + tCandidate * ray.direction;
         rec.normal   = normalize(cross(v0v1, v0v2));
-        rec.material.albedo   = tri.material.albedo;
+        rec.material = tri.material;
         return true;
     }
     return false;
 }
 
-
-Ray getCameraRay(Camera cam, float u, float v)
+Ray getCameraRay(float u, float v)
 {
-    vec3 forward = normalize(cam.lookAt - cam.lookFrom);
-    vec3 right   = normalize(cross(forward, cam.up));
+    vec3 forward = normalize(camera.lookAt - camera.lookFrom);
+    vec3 right   = normalize(cross(forward, camera.up));
     vec3 upVec   = cross(right, forward);
 
-    float fovRad     = radians(cam.fov);
+    float fovRad     = radians(camera.fov);
     float halfHeight = tan(fovRad * 0.5);
-    float halfWidth  = cam.aspectRatio * halfHeight;  
+    float halfWidth  = camera.aspectRatio * halfHeight;  
 
     float x = 2.0 * u - 1.0;
     float y = 2.0 * v - 1.0;
@@ -160,7 +166,7 @@ Ray getCameraRay(Camera cam, float u, float v)
                             + y * halfHeight * upVec);
 
     Ray r;
-    r.origin    = cam.lookFrom;
+    r.origin    = camera.lookFrom;
     r.direction = rayDir;
     return r;
 }
@@ -170,6 +176,10 @@ bool intersectScene(Ray ray, out HitRecord rec) {
     rec.position = vec3(0.0);
     rec.normal = vec3(0.0);
     rec.material.albedo = vec3(0.0);
+    rec.material.emission = vec3(0.0);
+    rec.material.emissionStrength = 0.0;
+    rec.material.roughness = 0.0;
+    rec.material.metallic = 0.0;
 
     bool hitAnything = false;
 
@@ -192,8 +202,14 @@ void main()
 {
     ivec2 pixelCoord    = ivec2(gl_GlobalInvocationID.xy);
     vec2 imgSize        = vec2(imageSize(outputImage));
-    vec2 uv             = (pixelCoord + 0.5) / imgSize;  
-    Ray ray             = getCameraRay(camera, uv.x, uv.y);
+    
+    float offsetX = rand(vec2(pixelCoord), 0.0);
+    float offsetY = rand(vec2(pixelCoord), 1.0);
+    vec2 randOffset = vec2(offsetX, offsetY);
+    
+    vec2 uv = (vec2(pixelCoord) + randOffset) / imgSize;  
+    
+    Ray ray = getCameraRay(uv.x, uv.y);
 
     HitRecord rec;
     bool hit = intersectScene(ray, rec);
