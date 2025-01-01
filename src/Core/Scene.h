@@ -33,8 +33,8 @@ struct Scene {
 
     inline void init(SDL_Window* window, float aspectRatio, GLuint computeProgram) {
         m_Camera = Camera(
-            {0.0, 2.5, 7.0}, 
-            {0.0, 0.0, 0.0}, 
+            {0.0, 2.5, 8.0}, 
+            {0.0, 2.0, 0.0}, 
             {0.0, 1.0, 0.0}, 
             60.0, 
             aspectRatio,
@@ -47,39 +47,53 @@ struct Scene {
 
         initConstUniforms(computeProgram);
 
-        Material redWall(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.5f, 0.0f);
-        Material greenWall(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.5f, 0.0f);
-        Material whiteWall(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.5f, 0.0f);
-        Material emissiveCeiling(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.7f, 0.0f, 0.0f);
+        Material redWall({1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, 0.0f, 0.5f, 0.0f);
+        Material greenWall({0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, 0.0f, 0.5f, 0.0f);
+        Material whiteWall({1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, 0.0f, 0.5f, 0.0f);
+        Material emissiveCeiling({1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, 1.0f, 0.0f, 0.0f);
 
-        Triangle redWall1(glm::vec3(-5.0f, 5.0f, -5.0f), glm::vec3(-5.0f, 5.0f, 5.0f), glm::vec3(-5.0f, 0.0f, -5.0f), redWall); 
-        Triangle redWall2(glm::vec3(-5.0f, 5.0f, 5.0f), glm::vec3(-5.0f, 0.0f, 5.0f), glm::vec3(-5.0f, 0.0f, -5.0f), redWall);
+        Triangle redWall1({-5.0f, 5.0f, -5.0f}, {-5.0f, 5.0f, 5.0f}, {-5.0f, 0.0f, -5.0f}, redWall); 
+        Triangle redWall2({-5.0f, 5.0f, 5.0f}, {-5.0f, 0.0f, 5.0f}, {-5.0f, 0.0f, -5.0f}, redWall);
         m_Triangles.push_back(redWall1); m_Triangles.push_back(redWall2);
 
-        Triangle greenWall1(glm::vec3(5.0f, 5.0f, -5.0f), glm::vec3(5.0f, 0.0f, -5.0f), glm::vec3(5.0f, 5.0f, 5.0f), greenWall); 
-        Triangle greenWall2(glm::vec3(5.0f, 5.0f, 5.0f), glm::vec3(5.0f, 0.0f, -5.0f), glm::vec3(5.0f, 0.0f, 5.0f), greenWall);
+        Triangle greenWall1({5.0f, 5.0f, -5.0f}, {5.0f, 0.0f, -5.0f}, {5.0f, 5.0f, 5.0f}, greenWall); 
+        Triangle greenWall2({5.0f, 5.0f, 5.0f}, {5.0f, 0.0f, -5.0f}, {5.0f, 0.0f, 5.0f}, greenWall);
         m_Triangles.push_back(greenWall1); m_Triangles.push_back(greenWall2);
 
-        Triangle backWall1(glm::vec3(-5.0f, 5.0f, -5.0f), glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(5.0f, 5.0f, -5.0f), whiteWall);
-        Triangle backWall2(glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(5.0f, 0.0f, -5.0f), glm::vec3(5.0f, 5.0f, -5.0f), whiteWall);
+        Triangle backWall1({-5.0f, 5.0f, -5.0f}, {-5.0f, 0.0f, -5.0f}, {5.0f, 5.0f, -5.0f}, whiteWall);
+        Triangle backWall2({-5.0f, 0.0f, -5.0f}, {5.0f, 0.0f, -5.0f}, {5.0f, 5.0f, -5.0f}, whiteWall);
         m_Triangles.push_back(backWall1); m_Triangles.push_back(backWall2);
 
-        Triangle ground1(glm::vec3(5.0f, 0.0f, -5.0f), glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(-5.0f, 0.0f, 5.0f), whiteWall);
-        Triangle ground2(glm::vec3(-5.0f, 0.0f, 5.0f), glm::vec3(5.0f, 0.0f, 5.0f), glm::vec3(5.0f, 0.0f, -5.0f), whiteWall);
+        Triangle ground1({5.0f, 0.0f, -5.0f}, {-5.0f, 0.0f, -5.0f}, {-5.0f, 0.0f, 5.0f}, whiteWall);
+        Triangle ground2({-5.0f, 0.0f, 5.0f}, {5.0f, 0.0f, 5.0f}, {5.0f, 0.0f, -5.0f}, whiteWall);
         m_Triangles.push_back(ground1); m_Triangles.push_back(ground2);
 
-        Triangle ceiling1(glm::vec3(-5.0f, 5.0f, -5.0f), glm::vec3(5.0f, 5.0f, 5.0f), glm::vec3(-5.0f, 5.0f, 5.0f), whiteWall);
-        Triangle ceiling2(glm::vec3(-5.0f, 5.0f, -5.0f), glm::vec3(5.0f, 5.0f, -5.0f), glm::vec3(5.0f, 5.0f, 5.0f), whiteWall);
+        Triangle ceiling1({-5.0f, 5.0f, -5.0f}, {5.0f, 5.0f, 5.0f}, {-5.0f, 5.0f, 5.0f}, whiteWall);
+        Triangle ceiling2({-5.0f, 5.0f, -5.0f}, {5.0f, 5.0f, -5.0f}, {5.0f, 5.0f, 5.0f}, whiteWall);
         m_Triangles.push_back(ceiling1); m_Triangles.push_back(ceiling2);
 
-        Triangle emissiveCeiling1(glm::vec3(-5.0f/2.0f, 4.9f, -5.0f/2.0f), glm::vec3(5.0f/2.0f, 4.9f, 5.0f/2.0f), glm::vec3(-5.0f/2.0f, 4.9f, 5.0f/2.0f), emissiveCeiling);
-        Triangle emissiveCeiling2(glm::vec3(-5.0f/2.0f, 4.9f, -5.0f/2.0f), glm::vec3(5.0f/2.0f, 4.9f, -5.0f/2.0f), glm::vec3(5.0f/2.0f, 4.9f, 5.0f/2.0f), emissiveCeiling);
+        Triangle emissiveCeiling1({-5.0f/1.5f, 4.9f, -5.0f/1.5f}, {5.0f/1.5f, 4.9f, 5.0f/1.5f}, {-5.0f/1.5f, 4.9f, 5.0f/1.5f}, emissiveCeiling);
+        Triangle emissiveCeiling2({-5.0f/1.5f, 4.9f, -5.0f/1.5f}, {5.0f/1.5f, 4.9f, -5.0f/1.5f}, {5.0f/1.5f, 4.9f, 5.0f/1.5f}, emissiveCeiling);
         m_Triangles.push_back(emissiveCeiling1); m_Triangles.push_back(emissiveCeiling2);
 
         initTrianglesSSBO();        
 
-        //m_Lights.push_back(Light(glm::vec3(1.0f, 3.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 10.0));
-        //initLightsSSBO();
+        Material gold({1.0f, 0.9f, 0.0f}, {0.0f, 0.0f, 0.0f}, 0.0f, 0.1f, 1.0f);
+        Material silver({0.7, 0.7, 0.7}, {0.0f, 0.0f, 0.0f}, 0.0f, 0.1f, 1.0f);
+        Material blue({0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, 0.0f, 1.0f, 0.0f);
+
+        Sphere sphereGold({-2.5f, 2.5f, -2.5f}, 2.5f, gold);
+        Sphere sphereSilver({1.0f, 1.2f, -1.0f}, 1.2f, silver);
+        Sphere sphereBlue({-3.0f, 0.4f, 3.0f}, 0.4f, blue);
+        m_Spheres.push_back(sphereGold); m_Spheres.push_back(sphereSilver); m_Spheres.push_back(sphereBlue);
+
+        initSpheresSSBO();
+
+        /*Light light1(glm::vec3(0.0f, 4.9f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
+        Light light2(glm::vec3(2.0f, 4.9f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
+        Light light3(glm::vec3(-2.0f, 4.9f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
+        m_Lights.push_back(light1); m_Lights.push_back(light2); m_Lights.push_back(light3);
+        initLightsSSBO();*/
     }
 
     inline void initConstUniforms(GLuint computeProgram) {

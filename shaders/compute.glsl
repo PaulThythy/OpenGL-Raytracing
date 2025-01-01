@@ -1,7 +1,7 @@
 #version 450
 
 #define PI 3.141592653589793238462643
-#define MAX_BOUNCES 50
+#define MAX_BOUNCES 10
 
 uniform int SAMPLES;
 uniform int BOUNCES;
