@@ -4,11 +4,11 @@
 #include <stdint.h>
 
 namespace Config {
-    inline int SAMPLES = 5;
-    inline int BOUNCES = 7;
+    inline int SAMPLES = 1;
+    inline int BOUNCES = 10;
 
-    inline uint32_t INIT_WINDOW_WIDTH   = 1280;
-    inline uint32_t INIT_WINDOW_HEIGHT  = 720; 
+    inline uint32_t INIT_WINDOW_WIDTH   = 1920;
+    inline uint32_t INIT_WINDOW_HEIGHT  = 1080; 
 }
 
 #endif

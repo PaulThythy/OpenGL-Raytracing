@@ -23,6 +23,11 @@ float rand(vec2 co, float seed) {
     return fract(sin(dot(co.xy + seed, vec2(12.9898, 78.233))) * 43758.5453123);
 }
 
+struct Vector3 {
+    vec3 position;
+    vec3 normal; 
+};
+
 struct Material {
     vec3 albedo;
     vec3 emission;
@@ -105,9 +110,9 @@ bool intersectSphere(Ray ray, Sphere sphere, inout HitRecord rec)
 }
 
 struct Triangle {
-    vec3 v0;
-    vec3 v1;
-    vec3 v2;
+    Vector3 v0;
+    Vector3 v1;
+    Vector3 v2;
     Material material;
 };
 
@@ -115,41 +120,53 @@ layout(std430, binding = 3) buffer TrianglesBlock {
     Triangle triangles[];
 } TrianglesBuffer;
 
-bool intersectTriangle(Ray ray, Triangle tri, inout HitRecord rec)
-{
-    vec3 v0v1 = tri.v1 - tri.v0;
-    vec3 v0v2 = tri.v2 - tri.v0;
-    vec3 pvec = cross(ray.direction, v0v2);
-    float det = dot(v0v1, pvec);
+bool intersectTriangle(Ray ray, Triangle tri, inout HitRecord rec) {
+    vec3 v0 = tri.v0.position;
+    vec3 v1 = tri.v1.position;
+    vec3 v2 = tri.v2.position;
+
+    vec3 edge1 = v1 - v0;
+    vec3 edge2 = v2 - v0;
+
+    vec3 pvec = cross(ray.direction, edge2);
+
+    float det = dot(edge1, pvec);
 
     if (abs(det) < EPSILON)
         return false;
 
     float invDet = 1.0 / det;
-    vec3 tvec = ray.origin - tri.v0;
+
+    vec3 tvec = ray.origin - v0;
+
     float u = dot(tvec, pvec) * invDet;
     if (u < 0.0 || u > 1.0)
         return false;
 
-    vec3 qvec = cross(tvec, v0v1);
+    vec3 qvec = cross(tvec, edge1);
     float v = dot(ray.direction, qvec) * invDet;
-    if (v < 0.0 || (u + v) > 1.0)
+    if (v < 0.0 || u + v > 1.0)
         return false;
 
-    float tCandidate = dot(v0v2, qvec) * invDet;
-    if (tCandidate < EPSILON)
+    float t = dot(edge2, qvec) * invDet;
+    if (t < EPSILON || t > rec.t)
         return false;
 
-    if (tCandidate < rec.t)
-    {
-        rec.t        = tCandidate;
-        rec.position = ray.origin + tCandidate * ray.direction;
-        rec.normal   = normalize(cross(v0v1, v0v2));
-        rec.material = tri.material;
-        return true;
-    }
-    return false;
+    rec.t = t;
+    rec.position = ray.origin + t * ray.direction;
+
+    vec3 n0 = tri.v0.normal;
+    vec3 n1 = tri.v1.normal;
+    vec3 n2 = tri.v2.normal;
+
+    vec3 interpolatedNormal = normalize((1.0 - u - v) * n0 + u * n1 + v * n2);
+    rec.normal = interpolatedNormal;
+
+    rec.material = tri.material;
+
+    return true;
 }
+
 
 Ray getCameraRay(float u, float v)
 {

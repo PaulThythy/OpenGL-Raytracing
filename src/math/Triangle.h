@@ -4,21 +4,22 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "math/Vector3.h"
 #include "Material.h"
 
 struct Triangle {
     inline Triangle() {}
 
     inline Triangle(
-        glm::vec3 v0, glm::vec3 v1, glm::vec3 v2,
+        Vector3 v0, Vector3 v1, Vector3 v2,
         Material material
     ): m_V0(v0), m_V1(v1), m_V2(v2), m_Material(material) {}
 
     inline ~Triangle() {}
 
-    alignas(16) glm::vec3 m_V0;
-    alignas(16) glm::vec3 m_V1;
-    alignas(16) glm::vec3 m_V2;
+    Vector3 m_V0;
+    Vector3 m_V1;
+    Vector3 m_V2;
 
     Material m_Material;
 };

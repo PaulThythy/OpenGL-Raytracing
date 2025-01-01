@@ -15,6 +15,7 @@
 #include "math/Triangle.h"
 #include "math/Light.h"
 #include "math/Material.h"
+#include "math/Vector3.h"
 
 struct Scene {
     inline Scene() {}
@@ -52,28 +53,88 @@ struct Scene {
         Material whiteWall({1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, 0.0f, 0.5f, 0.0f);
         Material emissiveCeiling({1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, 1.0f, 0.0f, 0.0f);
 
-        Triangle redWall1({-5.0f, 5.0f, -5.0f}, {-5.0f, 5.0f, 5.0f}, {-5.0f, 0.0f, -5.0f}, redWall); 
-        Triangle redWall2({-5.0f, 5.0f, 5.0f}, {-5.0f, 0.0f, 5.0f}, {-5.0f, 0.0f, -5.0f}, redWall);
+        Triangle redWall1(
+            Vector3({-5.0f, 5.0f, -5.0f}, {1.0f, 0.0f, 0.0f}), 
+            Vector3({-5.0f, 5.0f, 5.0f}, {1.0f, 0.0f, 0.0f}), 
+            Vector3({-5.0f, 0.0f, -5.0f}, {1.0f, 0.0f, 0.0f}), 
+            redWall
+        ); 
+        Triangle redWall2(
+            Vector3({-5.0f, 5.0f, 5.0f}, {1.0f, 0.0f, 0.0f}), 
+            Vector3({-5.0f, 0.0f, 5.0f}, {1.0f, 0.0f, 0.0f}), 
+            Vector3({-5.0f, 0.0f, -5.0f}, {1.0f, 0.0f, 0.0f}), 
+            redWall
+        );
         m_Triangles.push_back(redWall1); m_Triangles.push_back(redWall2);
 
-        Triangle greenWall1({5.0f, 5.0f, -5.0f}, {5.0f, 0.0f, -5.0f}, {5.0f, 5.0f, 5.0f}, greenWall); 
-        Triangle greenWall2({5.0f, 5.0f, 5.0f}, {5.0f, 0.0f, -5.0f}, {5.0f, 0.0f, 5.0f}, greenWall);
+        Triangle greenWall1(
+            Vector3({5.0f, 5.0f, -5.0f}, {-1.0f, 0.0f, 0.0f}), 
+            Vector3({5.0f, 0.0f, -5.0f}, {-1.0f, 0.0f, 0.0f}), 
+            Vector3({5.0f, 5.0f, 5.0f}, {-1.0f, 0.0f, 0.0f}), 
+            greenWall
+        ); 
+        Triangle greenWall2(
+            Vector3({5.0f, 5.0f, 5.0f}, {-1.0f, 0.0f, 0.0f}), 
+            Vector3({5.0f, 0.0f, -5.0f}, {-1.0f, 0.0f, 0.0f}), 
+            Vector3({5.0f, 0.0f, 5.0f}, {-1.0f, 0.0f, 0.0f}), 
+            greenWall
+        );
         m_Triangles.push_back(greenWall1); m_Triangles.push_back(greenWall2);
 
-        Triangle backWall1({-5.0f, 5.0f, -5.0f}, {-5.0f, 0.0f, -5.0f}, {5.0f, 5.0f, -5.0f}, whiteWall);
-        Triangle backWall2({-5.0f, 0.0f, -5.0f}, {5.0f, 0.0f, -5.0f}, {5.0f, 5.0f, -5.0f}, whiteWall);
+        Triangle backWall1(
+            Vector3({-5.0f, 5.0f, -5.0f}, {0.0f, 0.0f, 1.0f}), 
+            Vector3({-5.0f, 0.0f, -5.0f}, {0.0f, 0.0f, 1.0f}), 
+            Vector3({5.0f, 5.0f, -5.0f}, {0.0f, 0.0f, 1.0f}), 
+            whiteWall
+        );
+        Triangle backWall2(
+            Vector3({-5.0f, 0.0f, -5.0f}, {0.0f, 0.0f, 1.0f}), 
+            Vector3({5.0f, 0.0f, -5.0f}, {0.0f, 0.0f, 1.0f}), 
+            Vector3({5.0f, 5.0f, -5.0f}, {0.0f, 0.0f, 1.0f}), 
+            whiteWall
+        );
         m_Triangles.push_back(backWall1); m_Triangles.push_back(backWall2);
 
-        Triangle ground1({5.0f, 0.0f, -5.0f}, {-5.0f, 0.0f, -5.0f}, {-5.0f, 0.0f, 5.0f}, whiteWall);
-        Triangle ground2({-5.0f, 0.0f, 5.0f}, {5.0f, 0.0f, 5.0f}, {5.0f, 0.0f, -5.0f}, whiteWall);
+        Triangle ground1(
+            Vector3({5.0f, 0.0f, -5.0f}, {0.0f, 1.0f, 0.0f}), 
+            Vector3({-5.0f, 0.0f, -5.0f}, {0.0f, 1.0f, 0.0f}), 
+            Vector3({-5.0f, 0.0f, 5.0f}, {0.0f, 1.0f, 0.0f}), 
+            whiteWall
+        );
+        Triangle ground2(
+            Vector3({-5.0f, 0.0f, 5.0f}, {0.0f, 1.0f, 0.0f}), 
+            Vector3({5.0f, 0.0f, 5.0f}, {0.0f, 1.0f, 0.0f}), 
+            Vector3({5.0f, 0.0f, -5.0f}, {0.0f, 1.0f, 0.0f}), 
+            whiteWall
+        );
         m_Triangles.push_back(ground1); m_Triangles.push_back(ground2);
 
-        Triangle ceiling1({-5.0f, 5.0f, -5.0f}, {5.0f, 5.0f, 5.0f}, {-5.0f, 5.0f, 5.0f}, whiteWall);
-        Triangle ceiling2({-5.0f, 5.0f, -5.0f}, {5.0f, 5.0f, -5.0f}, {5.0f, 5.0f, 5.0f}, whiteWall);
+        Triangle ceiling1(
+            Vector3({-5.0f, 5.0f, -5.0f}, {0.0f, -1.0f, 0.0f}), 
+            Vector3({5.0f, 5.0f, 5.0f}, {0.0f, -1.0f, 0.0f}), 
+            Vector3({-5.0f, 5.0f, 5.0f}, {0.0f, -1.0f, 0.0f}),
+            whiteWall
+        );
+        Triangle ceiling2(
+            Vector3({-5.0f, 5.0f, -5.0f}, {0.0f, -1.0f, 0.0f}), 
+            Vector3({5.0f, 5.0f, -5.0f}, {0.0f, -1.0f, 0.0f}), 
+            Vector3({5.0f, 5.0f, 5.0f}, {0.0f, -1.0f, 0.0f}), 
+            whiteWall
+        );
         m_Triangles.push_back(ceiling1); m_Triangles.push_back(ceiling2);
 
-        Triangle emissiveCeiling1({-5.0f/1.5f, 4.9f, -5.0f/1.5f}, {5.0f/1.5f, 4.9f, 5.0f/1.5f}, {-5.0f/1.5f, 4.9f, 5.0f/1.5f}, emissiveCeiling);
-        Triangle emissiveCeiling2({-5.0f/1.5f, 4.9f, -5.0f/1.5f}, {5.0f/1.5f, 4.9f, -5.0f/1.5f}, {5.0f/1.5f, 4.9f, 5.0f/1.5f}, emissiveCeiling);
+        Triangle emissiveCeiling1(
+            Vector3({-5.0f/1.5f, 4.9f, -5.0f/1.5f}, {0.0f, -1.0f, 0.0f}), 
+            Vector3({5.0f/1.5f, 4.9f, 5.0f/1.5f}, {0.0f, -1.0f, 0.0f}), 
+            Vector3({-5.0f/1.5f, 4.9f, 5.0f/1.5f}, {0.0f, -1.0f, 0.0f}), 
+            emissiveCeiling
+        );
+        Triangle emissiveCeiling2(
+            Vector3({-5.0f/1.5f, 4.9f, -5.0f/1.5f}, {0.0f, -1.0f, 0.0f}), 
+            Vector3({5.0f/1.5f, 4.9f, -5.0f/1.5f}, {0.0f, -1.0f, 0.0f}), 
+            Vector3({5.0f/1.5f, 4.9f, 5.0f/1.5f}, {0.0f, -1.0f, 0.0f}), 
+            emissiveCeiling
+        );
         m_Triangles.push_back(emissiveCeiling1); m_Triangles.push_back(emissiveCeiling2);
 
         initTrianglesSSBO();        
