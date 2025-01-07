@@ -167,6 +167,15 @@ bool intersectTriangle(Ray ray, Triangle tri, inout HitRecord rec) {
     return true;
 }
 
+//TODO
+/*struct Mesh {
+    Triangle triangles[];
+}*/
+
+//TODO
+/*layout(std430, binding = ) buffer MeshesBlock {
+    Mesh meshes[];
+} MeshesBuffer;*/
 
 Ray getCameraRay(float u, float v)
 {

@@ -7,6 +7,5 @@ uniform sampler2D uTexture;
 
 void main()
 {
-    // Échantillonne la texture en uv = vTexCoord
     fragColor = texture(uTexture, vTexCoord);
 }

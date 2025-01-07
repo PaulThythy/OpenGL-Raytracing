@@ -33,3 +33,5 @@ bin
 .vscode
 build
 imgui.ini
+
+.codegpt
