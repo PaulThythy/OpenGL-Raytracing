@@ -58,12 +58,15 @@ struct Camera {
         m_LocCamFront       = glGetUniformLocation(m_ComputeProgram, "camera.front");
         m_LocCamRight       = glGetUniformLocation(m_ComputeProgram, "camera.right");
 
-        // check if all localisations are found
-        if (m_LocCamLookFrom == -1 || m_LocCamLookAt == -1 || m_LocCamUp == -1 ||
-            m_LocCamFov == -1 || m_LocCamAspect == -1 || m_LocCamNearPlane == -1 ||
-            m_LocCamFarPlane == -1 || m_LocCamFront == -1 || m_LocCamRight == -1) {
-            std::cerr << "Warning: One or more camera uniform locations not found.\n";
-        }
+        if(m_LocCamLookFrom == -1)  std::cerr << "Warning: Camera lookFrom uniform location not found.\n";
+        if(m_LocCamLookAt == -1)    std::cerr << "Warning: Camera lookAt uniform location not found.\n";
+        if(m_LocCamUp == -1)        std::cerr << "Warning: Camera up uniform location not found.\n";
+        if(m_LocCamFov == -1)       std::cerr << "Warning: Camera fov uniform location not found.\n";
+        if(m_LocCamAspect == -1)    std::cerr << "Warning: Camera aspectRatio uniform location not found.\n";
+        if(m_LocCamNearPlane == -1) std::cerr << "Warning: Camera nearPlane uniform location not found.\n";
+        if(m_LocCamFarPlane == -1)  std::cerr << "Warning: Camera farPlane uniform location not found.\n";
+        if(m_LocCamFront == -1)     std::cerr << "Warning: Camera front uniform location not found.\n";
+        if(m_LocCamRight == -1)     std::cerr << "Warning: Camera right uniform location not found.\n";
 
         glUseProgram(0);
     }
