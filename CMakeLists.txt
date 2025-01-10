@@ -24,6 +24,11 @@ add_executable(${PROJECT_NAME} ${sources} ${headers}
     ${IMGUI_DIR}/backends/imgui_impl_sdl3.cpp ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
 )
 
+# tinyobjloader
+set(TINYOBJLOADER_DIR ${CMAKE_SOURCE_DIR}/libs/tinyobjloader)
+add_subdirectory(${TINYOBJLOADER_DIR})
+include_directories(${TINYOBJLOADER_DIR})
+
 # OpenGL
 if(UNIX)
     # Linux 

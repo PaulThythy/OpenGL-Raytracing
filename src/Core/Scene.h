@@ -16,6 +16,7 @@
 #include "math/Light.h"
 #include "math/Material.h"
 #include "math/Vector3.h"
+#include "mesh/Mesh.h"
 
 struct Scene {
     inline Scene() {}
@@ -31,6 +32,10 @@ struct Scene {
 
     std::vector<Light> m_Lights;
     GLuint m_LightsSSBO = 0;
+
+    //TODO
+    //std::vector<Mesh> m_Meshes;
+    //GLuint m_MeshesSSBO = 0;
 
     inline void init(SDL_Window* window, float aspectRatio, GLuint computeProgram) {
         m_Camera = Camera(
@@ -149,12 +154,6 @@ struct Scene {
         m_Spheres.push_back(sphereGold); m_Spheres.push_back(sphereSilver); m_Spheres.push_back(sphereBlue);
 
         initSpheresSSBO();
-
-        /*Light light1(glm::vec3(0.0f, 4.9f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
-        Light light2(glm::vec3(2.0f, 4.9f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
-        Light light3(glm::vec3(-2.0f, 4.9f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
-        m_Lights.push_back(light1); m_Lights.push_back(light2); m_Lights.push_back(light3);
-        initLightsSSBO();*/
     }
 
     inline void initConstUniforms(GLuint computeProgram) {
@@ -236,6 +235,23 @@ struct Scene {
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, m_LightsSSBO);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
+
+    //TODO
+    /*
+    inline void initMeshesSSBO() {
+        glGenBuffers(1, &m_MeshesSSBO);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_MeshesSSBO);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, m_Meshes.size() * sizeof(Mesh), m_Meshes.data(), GL_STATIC_DRAW);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, m_MeshesSSBO);
+    }
+
+    inline void updateMeshesSSBO() {
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_MeshesSSBO);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, m_Meshes.size() * sizeof(Mesh), m_Meshes.data(), GL_STATIC_DRAW);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, m_MeshesSSBO);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    }
+    */
 };
 
 #endif
