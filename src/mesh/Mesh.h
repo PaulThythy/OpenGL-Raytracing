@@ -13,7 +13,7 @@
 struct Mesh {
     inline Mesh() {}
 
-    inline Mesh::Mesh(const std::string& meshPath, const std::string& materialPath) {
+    inline Mesh(const std::string& meshPath, const std::string& materialPath) {
         //TODO
     }
 
