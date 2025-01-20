@@ -17,14 +17,14 @@ struct Mesh {
         //TODO
     }*/
 
-    inline Mesh(const std::string& meshPath, Material material) {
+    inline Mesh(const std::string& meshPath, Material material, std::vector<Triangle>& sceneTriangles) {
         std::vector<glm::vec3> vertices;
         std::vector<glm::vec3> normals;
         std::vector<unsigned int> vertexIndices;
         std::vector<unsigned int> normalIndices;
 
         m_Material = material;
-        m_FirstTriangle = 0;
+        m_FirstTriangle = sceneTriangles.size();
         m_TriangleCount = 0;
 
         std::ifstream file(meshPath);
@@ -116,22 +116,20 @@ struct Mesh {
                 v0.m_Normal = v1.m_Normal = v2.m_Normal = normal;
             }
 
-            m_Triangles.push_back(Triangle(v0, v1, v2, m_Material));
+            sceneTriangles.push_back(Triangle(v0, v1, v2, m_Material));
+            m_TriangleCount++;
         }
-
-        m_FirstTriangle = 0;
-        m_TriangleCount = m_Triangles.size();
 
         std::cout << "Loaded mesh: " << meshPath << std::endl;
         std::cout << "Vertices: " << vertices.size() << std::endl;
-        std::cout << "Triangles: " << m_Triangles.size() << std::endl;
+        std::cout << "Triangles: " << m_TriangleCount << std::endl;
     }
 
     inline ~Mesh() {}
 
-    Material m_Material;
     int m_FirstTriangle;
     int m_TriangleCount;
+    Material m_Material;
 };
 
 #endif

@@ -160,7 +160,7 @@ struct Scene {
         m_Lights.push_back(light1); m_Lights.push_back(light2); m_Lights.push_back(light3);
         initLightsSSBO();*/
 
-        Mesh suzanne(std::string(MESH_DIR) + "/suzanne.obj", redWall);
+        Mesh suzanne(std::string(MESH_DIR) + "/suzanne.obj", redWall, m_Triangles);
         m_Meshes.push_back(suzanne);
         initMeshesSSBO();
 
