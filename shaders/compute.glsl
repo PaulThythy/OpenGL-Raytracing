@@ -167,6 +167,32 @@ bool intersectTriangle(Ray ray, Triangle tri, inout HitRecord rec) {
     return true;
 }
 
+struct Mesh {
+    int triangleOffset;
+    int triangleCount;
+    Material material;
+};
+
+layout(std430, binding = 5) buffer MeshesBlock {
+    Mesh meshes[];
+} MeshesBuffer;
+
+bool intersectMesh(Ray ray, Mesh mesh, inout HitRecord rec) {
+    bool hitAnything = false;
+    
+    for(int i = 0; i < mesh.triangleCount; i++) {
+        Triangle tri = TrianglesBuffer.triangles[mesh.triangleOffset + i];
+        // Use mesh material if triangle doesn't have a specific one
+        tri.material = mesh.material;
+        
+        if(intersectTriangle(ray, tri, rec)) {
+            hitAnything = true;
+        }
+    }
+    
+    return hitAnything;
+}
+
 Ray getCameraRay(float u, float v)
 {
     vec3 forward = normalize(camera.lookAt - camera.lookFrom);
@@ -289,6 +315,12 @@ bool traceRay(Ray ray, out HitRecord hitRecord) {
 
     for (int i = 0; i < TrianglesBuffer.triangles.length(); ++i) {
         if (intersectTriangle(ray, TrianglesBuffer.triangles[i], hitRecord)) { // Appel correct avec HitRecord
+            hitSomething = true;
+        }
+    }
+
+    for (int i = 0; i < MeshesBuffer.meshes.length(); ++i) {
+        if (intersectMesh(ray, MeshesBuffer.meshes[i], hitRecord)) {
             hitSomething = true;
         }
     }

@@ -3,10 +3,10 @@
 
 #include <iostream>
 #include <vector>
-#include <cstring>
-#include <unordered_map>
+#include <fstream>
+#include <sstream>
+#include <string>
 
-#include "tiny_obj_loader.h"
 #include "math/Triangle.h"
 #include "math/Material.h"
 
@@ -14,143 +14,109 @@ struct Mesh {
     inline Mesh() {}
 
     inline Mesh::Mesh(const std::string& meshPath, const std::string& materialPath) {
-        tinyobj::attrib_t attrib;
-        std::vector<tinyobj::shape_t> shapes;
-        std::vector<tinyobj::material_t> materials;
-        std::string warn, err;
-
-        bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, meshPath.c_str(), materialPath.c_str(), true);
-
-        if (!warn.empty()) {
-            std::cout << "WARNING: " << warn << std::endl;
-        }
-
-        if (!err.empty()) {
-            std::cerr << "ERROR: " << err << std::endl;
-        }
-
-        if (!ret) {
-            std::cerr << "Failed to load/parse .obj.\n";
-            return;
-        }
-
-        std::unordered_map<std::string, int> materialMap;
-
-        for (const auto& shape : shapes) {
-            size_t index_offset = 0;
-            for (size_t f = 0; f < shape.mesh.num_face_vertices.size(); f++) {
-                int fv = shape.mesh.num_face_vertices[f];
-                if (fv != 3) {
-                    std::cerr << "Non-triangle face detected. Skipping.\n";
-                    index_offset += fv;
-                    continue;
-                }
-
-                Triangle tri;
-
-                for (size_t v = 0; v < fv; v++) {
-                    tinyobj::index_t idx = shape.mesh.indices[index_offset + v];
-                    tinyobj::real_t vx = attrib.vertices[3 * idx.vertex_index + 0];
-                    tinyobj::real_t vy = attrib.vertices[3 * idx.vertex_index + 1];
-                    tinyobj::real_t vz = attrib.vertices[3 * idx.vertex_index + 2];
-                    glm::vec3 position = glm::vec3(vx, vy, vz);
-
-                    glm::vec3 normal(0.0f, 1.0f, 0.0f); //normal by default
-                    if (idx.normal_index >= 0) {
-                        tinyobj::real_t nx = attrib.normals[3 * idx.normal_index + 0];
-                        tinyobj::real_t ny = attrib.normals[3 * idx.normal_index + 1];
-                        tinyobj::real_t nz = attrib.normals[3 * idx.normal_index + 2];
-                        normal = glm::vec3(nx, ny, nz);
-                    }
-
-                    tri.m_V0 = Vector3(position, normal);
-                }
-
-                int matID = shape.mesh.material_ids[f];
-                if (matID >= 0 && matID < materials.size()) {
-                    const tinyobj::material_t& mat = materials[matID];
-
-                    glm::vec3 albedo(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2]);
-                    glm::vec3 emission(mat.emission[0], mat.emission[1], mat.emission[2]);
-                    float emissionStrength = mat.emission[0] + mat.emission[1] + mat.emission[2];
-                    float roughness = mat.roughness;
-                    float metallic = mat.metallic;
-                    tri.m_Material = Material(albedo, emission, emissionStrength, roughness, metallic);
-                }
-                else {
-                    tri.m_Material = Material(); //material by default
-                }
-
-                m_Triangles.push_back(tri);
-                index_offset += fv;
-            }
-        }
+        //TODO
     }
 
     inline Mesh(const std::string& meshPath, Material material) {
-        tinyobj::attrib_t attrib;
-        std::vector<tinyobj::shape_t> shapes;
-        std::vector<tinyobj::material_t> materials; 
-        std::string warn, err;
+        std::vector<glm::vec3> vertices;
+        std::vector<glm::vec3> normals;
+        std::vector<unsigned int> vertexIndices;
+        std::vector<unsigned int> normalIndices;
 
-        bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, meshPath.c_str(), nullptr, false);
-
-        if (!warn.empty()) {
-            std::cout << "WARNING: " << warn << std::endl;
-        }
-
-        if (!err.empty()) {
-            std::cerr << "ERROR: " << err << std::endl;
-        }
-
-        if (!ret) {
-            std::cerr << "Failed to load/parse .obj.\n";
+        std::ifstream file(meshPath);
+        if (!file.is_open()) {
+            std::cerr << "ERROR::MESH::Could not open file: " << meshPath << std::endl;
             return;
         }
 
+        std::string line;
+        while (std::getline(file, line)) {
+            std::istringstream iss(line);
+            std::string type;
+            iss >> type;
 
-        for (const auto& shape : shapes) {
-            size_t index_offset = 0;
-
-            for (size_t f = 0; f < shape.mesh.num_face_vertices.size(); f++) {
-                int fv = shape.mesh.num_face_vertices[f];
-                if (fv != 3) {
-                    std::cerr << "Non-triangle face detected. Skipping.\n";
-                    index_offset += fv;
-                    continue;
-                }
-
-                Triangle tri;
-
-                for (size_t v = 0; v < fv; v++) {
-                    tinyobj::index_t idx = shape.mesh.indices[index_offset + v];
-                    tinyobj::real_t vx = attrib.vertices[3 * idx.vertex_index + 0];
-                    tinyobj::real_t vy = attrib.vertices[3 * idx.vertex_index + 1];
-                    tinyobj::real_t vz = attrib.vertices[3 * idx.vertex_index + 2];
-                    glm::vec3 position = glm::vec3(vx, vy, vz);
-
-                    glm::vec3 normal(0.0f, 1.0f, 0.0f); //normal by default
-                    if (idx.normal_index >= 0) {
-                        tinyobj::real_t nx = attrib.normals[3 * idx.normal_index + 0];
-                        tinyobj::real_t ny = attrib.normals[3 * idx.normal_index + 1];
-                        tinyobj::real_t nz = attrib.normals[3 * idx.normal_index + 2];
-                        normal = glm::vec3(nx, ny, nz);
+            if (type == "v") {                                          // Vertex
+                float x, y, z;
+                iss >> x >> y >> z;
+                vertices.push_back(glm::vec3(x, y, z));
+            }
+            else if (type == "vn") {                                    // Normal
+                float x, y, z;
+                iss >> x >> y >> z;
+                normals.push_back(glm::normalize(glm::vec3(x, y, z)));
+            }
+            else if (type == "f") {                                     // Face
+                std::string vertex1, vertex2, vertex3;
+                iss >> vertex1 >> vertex2 >> vertex3;
+                
+                // Parse vertex indices
+                auto parseVertex = [](const std::string& vertex) -> std::pair<int, int> {
+                    std::istringstream viss(vertex);
+                    std::string indexStr;
+                    std::vector<std::string> indices;
+                    
+                    while (std::getline(viss, indexStr, '/')) {
+                        indices.push_back(indexStr);
                     }
+                    
+                    int vertexIndex = indices[0].empty() ? 0 : std::stoi(indices[0]);
+                    int normalIndex = (indices.size() < 3 || indices[2].empty()) ? 0 : std::stoi(indices[2]);
+                    
+                    // OBJ indices start at 1
+                    return {vertexIndex - 1, normalIndex - 1};
+                };
 
-                    tri.m_V0 = Vector3(position, normal);
-                }
+                auto [v1, n1] = parseVertex(vertex1);
+                auto [v2, n2] = parseVertex(vertex2);
+                auto [v3, n3] = parseVertex(vertex3);
 
-                tri.m_Material = material;
+                vertexIndices.push_back(v1);
+                vertexIndices.push_back(v2);
+                vertexIndices.push_back(v3);
 
-                m_Triangles.push_back(tri);
-                index_offset += fv;
+                normalIndices.push_back(n1);
+                normalIndices.push_back(n2);
+                normalIndices.push_back(n3);
             }
         }
+        file.close();
+
+        for (size_t i = 0; i < vertexIndices.size(); i += 3) {
+            Vector3 v0, v1, v2;
+
+            // First vertex
+            v0.m_Position = vertices[vertexIndices[i]];
+            v0.m_Normal = !normals.empty() ? normals[normalIndices[i]] : glm::vec3(0, 1, 0);
+
+            // Second vertex
+            v1.m_Position = vertices[vertexIndices[i + 1]];
+            v1.m_Normal = !normals.empty() ? normals[normalIndices[i + 1]] : glm::vec3(0, 1, 0);
+
+            // Third vertex
+            v2.m_Position = vertices[vertexIndices[i + 2]];
+            v2.m_Normal = !normals.empty() ? normals[normalIndices[i + 2]] : glm::vec3(0, 1, 0);
+
+            // If no normals in file, calculate a normal per face
+            if (normals.empty()) {
+                glm::vec3 edge1 = v1.m_Position - v0.m_Position;
+                glm::vec3 edge2 = v2.m_Position - v0.m_Position;
+                glm::vec3 normal = glm::normalize(glm::cross(edge1, edge2));
+                v0.m_Normal = v1.m_Normal = v2.m_Normal = normal;
+            }
+
+            m_Triangles.push_back(Triangle(v0, v1, v2, m_Material));
+        }
+
+        std::cout << "Loaded mesh: " << meshPath << std::endl;
+        std::cout << "Vertices: " << vertices.size() << std::endl;
+        std::cout << "Triangles: " << m_Triangles.size() << std::endl;
     }
 
     inline ~Mesh() {}
 
     std::vector<Triangle> m_Triangles;
+    Material m_Material;
+    int m_TriangleOffset;
 };
 
 #endif

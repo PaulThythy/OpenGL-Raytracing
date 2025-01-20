@@ -33,9 +33,8 @@ struct Scene {
     std::vector<Light> m_Lights;
     GLuint m_LightsSSBO = 0;
 
-    //TODO
-    //std::vector<Mesh> m_Meshes;
-    //GLuint m_MeshesSSBO = 0;
+    std::vector<Mesh> m_Meshes;
+    GLuint m_MeshesSSBO = 0;
 
     inline void init(SDL_Window* window, float aspectRatio, GLuint computeProgram) {
         m_Camera = Camera(
@@ -58,7 +57,7 @@ struct Scene {
         Material whiteWall({1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, 0.0f, 0.5f, 0.0f);
         Material emissiveCeiling({1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, 1.0f, 0.0f, 0.0f);
 
-        Triangle redWall1(
+        /*Triangle redWall1(
             Vector3({-5.0f, 5.0f, -5.0f}, {1.0f, 0.0f, 0.0f}), 
             Vector3({-5.0f, 5.0f, 5.0f}, {1.0f, 0.0f, 0.0f}), 
             Vector3({-5.0f, 0.0f, -5.0f}, {1.0f, 0.0f, 0.0f}), 
@@ -153,7 +152,21 @@ struct Scene {
         Sphere sphereBlue({-3.0f, 0.4f, 3.0f}, 0.4f, blue);
         m_Spheres.push_back(sphereGold); m_Spheres.push_back(sphereSilver); m_Spheres.push_back(sphereBlue);
 
-        initSpheresSSBO();
+        initSpheresSSBO();*/
+
+        /*Light light1(glm::vec3(0.0f, 4.9f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
+        Light light2(glm::vec3(2.0f, 4.9f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
+        Light light3(glm::vec3(-2.0f, 4.9f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
+        m_Lights.push_back(light1); m_Lights.push_back(light2); m_Lights.push_back(light3);
+        initLightsSSBO();*/
+
+        Mesh suzanne(std::string(MESH_DIR) + "/suzanne.obj", redWall);
+        m_Meshes.push_back(suzanne);
+        initMeshesSSBO();
+
+        Light light1(glm::vec3(0.0f, 4.9f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
+        m_Lights.push_back(light1);
+        initLightsSSBO();
     }
 
     inline void initConstUniforms(GLuint computeProgram) {
@@ -236,13 +249,11 @@ struct Scene {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
-    //TODO
-    /*
     inline void initMeshesSSBO() {
         glGenBuffers(1, &m_MeshesSSBO);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_MeshesSSBO);
         glBufferData(GL_SHADER_STORAGE_BUFFER, m_Meshes.size() * sizeof(Mesh), m_Meshes.data(), GL_STATIC_DRAW);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, m_MeshesSSBO);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, m_MeshesSSBO);        //binding 5
     }
 
     inline void updateMeshesSSBO() {
@@ -251,7 +262,6 @@ struct Scene {
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, m_MeshesSSBO);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
-    */
 };
 
 #endif
