@@ -30,7 +30,9 @@
 
 bin
 .vscode
+.vs
 build
+out
 imgui.ini
 
 .codegpt

@@ -164,7 +164,7 @@ struct Scene {
         m_Meshes.push_back(suzanne);
         initMeshesSSBO();
 
-        Light light1(glm::vec3(0.0f, 4.9f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
+        Light light1(glm::vec3(0.0f, 4.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
         m_Lights.push_back(light1);
         initLightsSSBO();
     }

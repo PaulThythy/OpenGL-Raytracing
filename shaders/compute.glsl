@@ -168,7 +168,7 @@ bool intersectTriangle(Ray ray, Triangle tri, inout HitRecord rec) {
 }
 
 struct Mesh {
-    int triangleOffset;
+    int firstTriangle;
     int triangleCount;
     Material material;
 };
@@ -180,9 +180,8 @@ layout(std430, binding = 5) buffer MeshesBlock {
 bool intersectMesh(Ray ray, Mesh mesh, inout HitRecord rec) {
     bool hitAnything = false;
     
-    for(int i = 0; i < mesh.triangleCount; i++) {
-        Triangle tri = TrianglesBuffer.triangles[mesh.triangleOffset + i];
-        // Use mesh material if triangle doesn't have a specific one
+    for(int i = mesh.firstTriangle; i < mesh.firstTriangle + mesh.triangleCount; i++) {
+        Triangle tri = TrianglesBuffer.triangles[i];
         tri.material = mesh.material;
         
         if(intersectTriangle(ray, tri, rec)) {

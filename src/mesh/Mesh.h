@@ -13,15 +13,19 @@
 struct Mesh {
     inline Mesh() {}
 
-    inline Mesh(const std::string& meshPath, const std::string& materialPath) {
+    /*inline Mesh(const std::string& meshPath, const std::string& materialPath) {
         //TODO
-    }
+    }*/
 
     inline Mesh(const std::string& meshPath, Material material) {
         std::vector<glm::vec3> vertices;
         std::vector<glm::vec3> normals;
         std::vector<unsigned int> vertexIndices;
         std::vector<unsigned int> normalIndices;
+
+        m_Material = material;
+        m_FirstTriangle = 0;
+        m_TriangleCount = 0;
 
         std::ifstream file(meshPath);
         if (!file.is_open()) {
@@ -66,9 +70,17 @@ struct Mesh {
                     return {vertexIndex - 1, normalIndex - 1};
                 };
 
-                auto [v1, n1] = parseVertex(vertex1);
-                auto [v2, n2] = parseVertex(vertex2);
-                auto [v3, n3] = parseVertex(vertex3);
+                std::pair<int, int> vertexPair1 = parseVertex(vertex1);
+                int v1 = vertexPair1.first;
+                int n1 = vertexPair1.second;
+
+                std::pair<int, int> vertexPair2 = parseVertex(vertex2);
+                int v2 = vertexPair2.first;
+                int n2 = vertexPair2.second;
+
+                std::pair<int, int> vertexPair3 = parseVertex(vertex3);
+                int v3 = vertexPair3.first;
+                int n3 = vertexPair3.second;
 
                 vertexIndices.push_back(v1);
                 vertexIndices.push_back(v2);
@@ -107,6 +119,9 @@ struct Mesh {
             m_Triangles.push_back(Triangle(v0, v1, v2, m_Material));
         }
 
+        m_FirstTriangle = 0;
+        m_TriangleCount = m_Triangles.size();
+
         std::cout << "Loaded mesh: " << meshPath << std::endl;
         std::cout << "Vertices: " << vertices.size() << std::endl;
         std::cout << "Triangles: " << m_Triangles.size() << std::endl;
@@ -114,9 +129,9 @@ struct Mesh {
 
     inline ~Mesh() {}
 
-    std::vector<Triangle> m_Triangles;
     Material m_Material;
-    int m_TriangleOffset;
+    int m_FirstTriangle;
+    int m_TriangleCount;
 };
 
 #endif
