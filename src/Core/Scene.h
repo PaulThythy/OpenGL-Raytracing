@@ -163,6 +163,14 @@ struct Scene {
         Mesh suzanne(std::string(MESH_DIR) + "/suzanne.obj", redWall, m_Triangles);
         m_Meshes.push_back(suzanne);
 
+        Vector3 v0(glm::vec3(-5.0f, -1.0f, -5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        Vector3 v1(glm::vec3(-5.0f, -1.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        Vector3 v2(glm::vec3(5.0f, -1.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        Vector3 v3(glm::vec3(5.0f, -1.0f, -5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        m_Triangles.push_back(Triangle(v0, v1, v2, whiteWall));
+        m_Triangles.push_back(Triangle(v0, v2, v3, whiteWall));
+
         initMeshesSSBO();
         initTrianglesSSBO();
 
