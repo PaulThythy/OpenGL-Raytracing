@@ -162,9 +162,11 @@ struct Scene {
 
         Mesh suzanne(std::string(MESH_DIR) + "/suzanne.obj", redWall, m_Triangles);
         m_Meshes.push_back(suzanne);
-        initMeshesSSBO();
 
-        Light light1(glm::vec3(0.0f, 4.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
+        initMeshesSSBO();
+        initTrianglesSSBO();
+
+        Light light1(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
         m_Lights.push_back(light1);
         initLightsSSBO();
     }
