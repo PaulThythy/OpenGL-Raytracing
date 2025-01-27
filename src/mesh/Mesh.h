@@ -10,6 +10,9 @@
 #include "math/Triangle.h"
 #include "math/Material.h"
 
+//#define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
+
 struct Mesh {
     inline Mesh() {}
 
@@ -18,118 +21,58 @@ struct Mesh {
     }*/
 
     inline Mesh(const std::string& filename, const Material& material, std::vector<Triangle>& outTriangles) {
-        std::vector<glm::vec3> vertices;
-        std::vector<glm::vec3> normals;
-        std::vector<unsigned int> vertexIndices;
-        std::vector<unsigned int> normalIndices;
+        tinyobj::ObjReader reader;
+        tinyobj::ObjReaderConfig reader_config;
 
-        m_Material = material;
-        m_FirstTriangle = outTriangles.size();
-        m_TriangleCount = 0;
-
-        std::ifstream file(filename);
-        if (!file.is_open()) {
-            std::cerr << "ERROR::MESH::Could not open file: " << filename << std::endl;
+        if (!reader.ParseFromFile(filename, reader_config)) {
+            if (!reader.Error().empty()) {
+                std::cerr << "TinyObjReader: " << reader.Error();
+            }
             return;
         }
 
-        std::string line;
-        while (std::getline(file, line)) {
-            std::istringstream iss(line);
-            std::string type;
-            iss >> type;
+        auto& attrib = reader.GetAttrib();
+        auto& shapes = reader.GetShapes();
 
-            if (type == "v") {                                          // Vertex
-                float x, y, z;
-                iss >> x >> y >> z;
-                vertices.push_back(glm::vec3(x, y, z));
-            }
-            else if (type == "vn") {                                    // Normal
-                float x, y, z;
-                iss >> x >> y >> z;
-                normals.push_back(glm::normalize(glm::vec3(x, y, z)));
-            }
-            else if (type == "f") {                                     // Face
-                std::string vertex1, vertex2, vertex3;
-                iss >> vertex1 >> vertex2 >> vertex3;
+        // loop over all shapes
+        for (const auto& shape : shapes) {
+            for (size_t f = 0; f < shape.mesh.num_face_vertices.size(); f++) {
+                Vector3 vertices[3];
                 
-                // Parse vertex indices
-                auto parseVertex = [](const std::string& vertex) -> std::pair<int, int> {
-                    std::istringstream viss(vertex);
-                    std::string indexStr;
-                    std::vector<std::string> indices;
+                // get the 3 vertices of the triangle
+                for (size_t v = 0; v < 3; v++) {
+                    tinyobj::index_t idx = shape.mesh.indices[3*f + v];
                     
-                    while (std::getline(viss, indexStr, '/')) {
-                        indices.push_back(indexStr);
+                    float vx = attrib.vertices[3*idx.vertex_index+0];
+                    float vy = attrib.vertices[3*idx.vertex_index+1];
+                    float vz = attrib.vertices[3*idx.vertex_index+2];
+                    
+                    glm::vec3 normal;
+                    if (idx.normal_index >= 0) {
+                        normal = glm::vec3(
+                            attrib.normals[3*idx.normal_index+0],
+                            attrib.normals[3*idx.normal_index+1],
+                            attrib.normals[3*idx.normal_index+2]
+                        );
+                    } else {
+                        normal = glm::vec3(0.0f, 1.0f, 0.0f);
                     }
-                    
-                    int vertexIndex = indices[0].empty() ? 0 : std::stoi(indices[0]);
-                    int normalIndex = (indices.size() < 3 || indices[2].empty()) ? 0 : std::stoi(indices[2]);
-                    
-                    // OBJ indices start at 1
-                    return {vertexIndex - 1, normalIndex - 1};
-                };
 
-                std::pair<int, int> vertexPair1 = parseVertex(vertex1);
-                int v1 = vertexPair1.first;
-                int n1 = vertexPair1.second;
+                    vertices[v] = Vector3(
+                        glm::vec3(vx, vy, vz) * glm::vec3(2.0f) + glm::vec3(0.0f, 2.0f, 0.0f),  
+                        normal
+                    );
+                }
 
-                std::pair<int, int> vertexPair2 = parseVertex(vertex2);
-                int v2 = vertexPair2.first;
-                int n2 = vertexPair2.second;
-
-                std::pair<int, int> vertexPair3 = parseVertex(vertex3);
-                int v3 = vertexPair3.first;
-                int n3 = vertexPair3.second;
-
-                vertexIndices.push_back(v1);
-                vertexIndices.push_back(v2);
-                vertexIndices.push_back(v3);
-
-                normalIndices.push_back(n1);
-                normalIndices.push_back(n2);
-                normalIndices.push_back(n3);
+                outTriangles.push_back(Triangle(vertices[0], vertices[1], vertices[2], material));
             }
-        }
-        file.close();
-
-        for (size_t i = 0; i < vertexIndices.size(); i += 3) {
-            Vector3 v0, v1, v2;
-
-            // First vertex
-            v0.m_Position = vertices[vertexIndices[i]];
-            v0.m_Normal = !normals.empty() ? normals[normalIndices[i]] : glm::vec3(0, 1, 0);
-
-            // Second vertex
-            v1.m_Position = vertices[vertexIndices[i + 1]];
-            v1.m_Normal = !normals.empty() ? normals[normalIndices[i + 1]] : glm::vec3(0, 1, 0);
-
-            // Third vertex
-            v2.m_Position = vertices[vertexIndices[i + 2]];
-            v2.m_Normal = !normals.empty() ? normals[normalIndices[i + 2]] : glm::vec3(0, 1, 0);
-
-            // If no normals in file, calculate a normal per face
-            if (normals.empty()) {
-                glm::vec3 edge1 = v1.m_Position - v0.m_Position;
-                glm::vec3 edge2 = v2.m_Position - v0.m_Position;
-                glm::vec3 normal = glm::normalize(glm::cross(edge1, edge2));
-                v0.m_Normal = v1.m_Normal = v2.m_Normal = normal;
-            }
-
-            outTriangles.push_back(Triangle(v0, v1, v2, m_Material));
-            m_TriangleCount++;
         }
 
         std::cout << "Loaded mesh: " << filename << std::endl;
-        std::cout << "Vertices: " << vertices.size() << std::endl;
-        std::cout << "Triangles: " << m_TriangleCount << std::endl;
+        std::cout << "Added triangles: " << shapes[0].mesh.num_face_vertices.size() << std::endl;
     }
 
     inline ~Mesh() {}
-
-    int m_FirstTriangle;
-    int m_TriangleCount;
-    Material m_Material;
 };
 
 #endif

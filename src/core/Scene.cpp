@@ -116,13 +116,16 @@ void Scene::init(SDL_Window* window, float aspectRatio, GLuint computeProgram) {
     Sphere sphereBlue({-3.0f, 0.4f, 3.0f}, 0.4f, blue);
     m_Spheres.push_back(sphereGold); m_Spheres.push_back(sphereSilver); m_Spheres.push_back(sphereBlue);
 
-    initSpheresSSBO();*/
+    initSpheresSSBO();
 
-    /*Light light1(glm::vec3(0.0f, 4.9f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
+    Light light1(glm::vec3(0.0f, 4.9f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
     Light light2(glm::vec3(2.0f, 4.9f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
     Light light3(glm::vec3(-2.0f, 4.9f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
     m_Lights.push_back(light1); m_Lights.push_back(light2); m_Lights.push_back(light3);
-    initLightsSSBO();*/
+    initLightsSSBO();
+
+    m_BVH.build(m_Triangles);
+    initBVHSSBO();*/
 
     // Add ground plane
     Vector3 v0(glm::vec3(-5.0f, -1.0f, -5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -134,7 +137,7 @@ void Scene::init(SDL_Window* window, float aspectRatio, GLuint computeProgram) {
     m_Triangles.push_back(Triangle(v0, v2, v3, whiteWall));
 
     // Load icosphere mesh
-    Mesh icosphere(std::string(MESH_DIR) + "/icosphere.obj", redWall, m_Triangles);
+    //Mesh icosphere(std::string(MESH_DIR) + "/icosphere.obj", redWall, m_Triangles);
 
     // Initialize SSBOs in the correct order
     initTrianglesSSBO();    // First upload triangles

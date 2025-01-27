@@ -19,9 +19,14 @@ include_directories(${PROJECT_SOURCE_DIR}/libs/glm)
 set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/libs/imgui)
 include_directories(${IMGUI_DIR} ${IMGUI_DIR}/backends ..)
 
+# TinyObjLoader
+set(TINYOBJLOADER_SOURCE_DIR ${CMAKE_SOURCE_DIR}/libs/tinyobjloader)
+add_subdirectory(${TINYOBJLOADER_SOURCE_DIR})
+include_directories(${TINYOBJLOADER_SOURCE_DIR})
+
 add_executable(${PROJECT_NAME} ${sources} ${headers}
     ${IMGUI_DIR}/imgui.cpp ${IMGUI_DIR}/imgui_demo.cpp ${IMGUI_DIR}/imgui_draw.cpp ${IMGUI_DIR}/imgui_tables.cpp ${IMGUI_DIR}/imgui_widgets.cpp
-    ${IMGUI_DIR}/backends/imgui_impl_sdl3.cpp ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+    ${IMGUI_DIR}/backends/imgui_impl_sdl3.cpp ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp ${TINYOBJLOADER_SOURCE_DIR}/tiny_obj_loader.h
 )
 
 # OpenGL
@@ -30,7 +35,7 @@ if(UNIX)
     find_package(OpenGL REQUIRED)
     find_package(GLEW REQUIRED)
 
-    set(LIBRARIES "SDL3::SDL3;OpenGL::GL;GLEW::GLEW;glm::glm")
+    set(LIBRARIES "SDL3::SDL3;OpenGL::GL;GLEW::GLEW;glm::glm;tinyobjloader")
 else()
    # Windows 
    set(GLEW_ROOT_DIR "${PROJECT_SOURCE_DIR}/libs/GLEW")
@@ -46,6 +51,7 @@ else()
         glm::glm 
         "${GLEW_LIB_DIR}/glew32.lib"
         opengl32
+        tinyobjloader
     )
 
    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
