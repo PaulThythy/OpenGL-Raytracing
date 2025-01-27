@@ -17,19 +17,19 @@ struct Mesh {
         //TODO
     }*/
 
-    inline Mesh(const std::string& meshPath, Material material, std::vector<Triangle>& sceneTriangles) {
+    inline Mesh(const std::string& filename, const Material& material, std::vector<Triangle>& outTriangles) {
         std::vector<glm::vec3> vertices;
         std::vector<glm::vec3> normals;
         std::vector<unsigned int> vertexIndices;
         std::vector<unsigned int> normalIndices;
 
         m_Material = material;
-        m_FirstTriangle = sceneTriangles.size();
+        m_FirstTriangle = outTriangles.size();
         m_TriangleCount = 0;
 
-        std::ifstream file(meshPath);
+        std::ifstream file(filename);
         if (!file.is_open()) {
-            std::cerr << "ERROR::MESH::Could not open file: " << meshPath << std::endl;
+            std::cerr << "ERROR::MESH::Could not open file: " << filename << std::endl;
             return;
         }
 
@@ -116,11 +116,11 @@ struct Mesh {
                 v0.m_Normal = v1.m_Normal = v2.m_Normal = normal;
             }
 
-            sceneTriangles.push_back(Triangle(v0, v1, v2, m_Material));
+            outTriangles.push_back(Triangle(v0, v1, v2, m_Material));
             m_TriangleCount++;
         }
 
-        std::cout << "Loaded mesh: " << meshPath << std::endl;
+        std::cout << "Loaded mesh: " << filename << std::endl;
         std::cout << "Vertices: " << vertices.size() << std::endl;
         std::cout << "Triangles: " << m_TriangleCount << std::endl;
     }
