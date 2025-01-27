@@ -3,8 +3,8 @@
 
 #include <GL/glew.h>
 
-#include "Shader/Shader.h"
-#include "Core/Scene.h"
+#include "shader/Shader.h"
+#include "core/Scene.h"
 
 struct Renderer {
 public:

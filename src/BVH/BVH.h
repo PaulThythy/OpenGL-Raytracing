@@ -5,21 +5,19 @@
 
 #include "BVHNode.h"
 #include "math/Triangle.h"
-
+#include "math/AABB.h"
 class BVH {
 public:
 	std::vector<BVHNode> m_Nodes;
 	std::vector<Triangle> m_OrderedTriangles;
-	int m_RootNodeIndex;
+	alignas(16)int m_RootNodeIndex;
 
-	inline BVH(): m_RootNodeIndex(0) {}
+	inline BVH(): m_RootNodeIndex(-1) {}
 
-	void build(const std::vector<Triangle>& triangles);
+	void build(const std::vector<Triangle>& triangles, int maxTrianglesPerLeaf = 4);
 
 private:
-	AABB computeTriangleAABB(const Triangle& triangle);
-	void buildRecursive(int nodeIndex, int start, int end, std::vector<AABB>& primitiveBounds);
-	
+	int buildRecursive(int start, int end, const std::vector<AABB>& triangleBounds, int maxTrianglesPerLeaf);
 };
 
 #endif

@@ -294,6 +294,69 @@ vec3 computeBRDF(Material material, vec3 N, vec3 V, vec3 L) {
     return diffuse + specular;
 }
 
+struct AABB {
+    vec3 min;
+    vec3 max;
+};
+
+struct BVHNode {
+    AABB bounds;
+    int firstPrimitive;
+    int primitiveCount;
+    int leftChild;
+    int rightChild;
+};
+
+layout(std430, binding = 6) buffer BVHNodesBlock {
+    BVHNode nodes[];
+} BVHBuffer;
+
+bool intersectAABB(Ray ray, AABB aabb) {
+    vec3 invDir = 1.0 / ray.direction;
+    
+    vec3 t0 = (aabb.min - ray.origin) * invDir;
+    vec3 t1 = (aabb.max - ray.origin) * invDir;
+    
+    vec3 tmin = min(t0, t1);
+    vec3 tmax = max(t0, t1);
+    
+    float tNear = max(max(tmin.x, tmin.y), tmin.z);
+    float tFar = min(min(tmax.x, tmax.y), tmax.z);
+    
+    return tNear <= tFar && tFar > 0;
+}
+
+bool intersectBVH(Ray ray, inout HitRecord hitRecord) {
+    const int MAX_STACK = 64;
+    int stack[MAX_STACK];
+    int stackPtr = 0;
+    
+    stack[stackPtr++] = 0; // Push root node
+    bool hit = false;
+    
+    while (stackPtr > 0) {
+        int nodeIdx = stack[--stackPtr];
+        BVHNode node = BVHBuffer.nodes[nodeIdx];
+        
+        if (!intersectAABB(ray, node.bounds))
+            continue;
+            
+        if (node.leftChild == -1) { // Leaf node
+            for (int i = 0; i < node.primitiveCount; i++) {
+                Triangle tri = TrianglesBuffer.triangles[node.firstPrimitive + i];
+                if (intersectTriangle(ray, tri, hitRecord)) {
+                    hit = true;
+                }
+            }
+        } else {
+            stack[stackPtr++] = node.leftChild;
+            stack[stackPtr++] = node.rightChild;
+        }
+    }
+    
+    return hit;
+}
+
 bool traceRay(Ray ray, out HitRecord hitRecord) {
     hitRecord.t      = 1e20;
     hitRecord.position = vec3(0.0);
@@ -312,10 +375,9 @@ bool traceRay(Ray ray, out HitRecord hitRecord) {
         }
     }
 
-    for (int i = 0; i < TrianglesBuffer.triangles.length(); ++i) {
-        if (intersectTriangle(ray, TrianglesBuffer.triangles[i], hitRecord)) { // Appel correct avec HitRecord
-            hitSomething = true;
-        }
+    // Test BVH for triangles
+    if (intersectBVH(ray, hitRecord)) {
+        hitSomething = true;
     }
 
     for (int i = 0; i < MeshesBuffer.meshes.length(); ++i) {

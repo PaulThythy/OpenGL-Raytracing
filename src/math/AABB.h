@@ -5,8 +5,8 @@
 #include <algorithm>
 
 struct AABB {
-	glm::vec3 m_Min;
-	glm::vec3 m_Max;
+	alignas(16) glm::vec3 m_Min;
+	alignas(16) glm::vec3 m_Max;
 
 	inline AABB() : m_Min(glm::vec3(INFINITY)), m_Max(glm::vec3(-INFINITY)) {}
 

@@ -17,6 +17,7 @@
 #include "math/Material.h"
 #include "math/Vector3.h"
 #include "mesh/Mesh.h"
+#include "BVH/BVH.h"
 
 struct Scene {
     inline Scene() {}
@@ -36,6 +37,9 @@ struct Scene {
     std::vector<Mesh> m_Meshes;
     GLuint m_MeshesSSBO = 0;
 
+    BVH m_BVH;
+    GLuint m_BVHNodesSSBO = 0;
+
     void init(SDL_Window* window, float aspectRatio, GLuint computeProgram);
 
     void initConstUniforms(GLuint computeProgram);
@@ -54,6 +58,8 @@ struct Scene {
     void initMeshesSSBO();
     void updateMeshesSSBO();
 
+    void initBVHSSBO();
+    void updateBVHSSBO();
 
 };
 
