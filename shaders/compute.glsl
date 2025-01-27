@@ -167,31 +167,6 @@ bool intersectTriangle(Ray ray, Triangle tri, inout HitRecord rec) {
     return true;
 }
 
-struct Mesh {
-    int firstTriangle;
-    int triangleCount;
-    Material material;
-};
-
-layout(std430, binding = 5) buffer MeshesBlock {
-    Mesh meshes[];
-} MeshesBuffer;
-
-bool intersectMesh(Ray ray, Mesh mesh, inout HitRecord rec) {
-    bool hitAnything = false;
-    
-    for(int i = mesh.firstTriangle; i < mesh.firstTriangle + mesh.triangleCount; i++) {
-        Triangle tri = TrianglesBuffer.triangles[i];
-        tri.material = mesh.material;
-        
-        if(intersectTriangle(ray, tri, rec)) {
-            hitAnything = true;
-        }
-    }
-    
-    return hitAnything;
-}
-
 Ray getCameraRay(float u, float v)
 {
     vec3 forward = normalize(camera.lookAt - camera.lookFrom);
@@ -344,8 +319,13 @@ bool intersectBVH(Ray ray, inout HitRecord hitRecord) {
         if (node.leftChild == -1) { // Leaf node
             for (int i = 0; i < node.primitiveCount; i++) {
                 Triangle tri = TrianglesBuffer.triangles[node.firstPrimitive + i];
-                if (intersectTriangle(ray, tri, hitRecord)) {
-                    hit = true;
+                
+                HitRecord tempHit = hitRecord;
+                if (intersectTriangle(ray, tri, tempHit)) {
+                    if (tempHit.t < hitRecord.t) {
+                        hitRecord = tempHit;
+                        hit = true;
+                    }
                 }
             }
         } else {
@@ -369,21 +349,16 @@ bool traceRay(Ray ray, out HitRecord hitRecord) {
 
     bool hitSomething = false;
 
+    // Test spheres
     for (int i = 0; i < SpheresBuffer.spheres.length(); ++i) {
         if (intersectSphere(ray, SpheresBuffer.spheres[i], hitRecord)) {
             hitSomething = true;
         }
     }
 
-    // Test BVH for triangles
+    // Test all triangles using BVH
     if (intersectBVH(ray, hitRecord)) {
         hitSomething = true;
-    }
-
-    for (int i = 0; i < MeshesBuffer.meshes.length(); ++i) {
-        if (intersectMesh(ray, MeshesBuffer.meshes[i], hitRecord)) {
-            hitSomething = true;
-        }
     }
 
     return hitSomething;

@@ -34,9 +34,6 @@ struct Scene {
     std::vector<Light> m_Lights;
     GLuint m_LightsSSBO = 0;
 
-    std::vector<Mesh> m_Meshes;
-    GLuint m_MeshesSSBO = 0;
-
     BVH m_BVH;
     GLuint m_BVHNodesSSBO = 0;
 
@@ -54,9 +51,6 @@ struct Scene {
 
     void initLightsSSBO();
     void updateLightsSSBO();
-
-    void initMeshesSSBO();
-    void updateMeshesSSBO();
 
     void initBVHSSBO();
     void updateBVHSSBO();

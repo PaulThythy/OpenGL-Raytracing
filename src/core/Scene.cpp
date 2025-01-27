@@ -135,12 +135,12 @@ void Scene::init(SDL_Window* window, float aspectRatio, GLuint computeProgram) {
 
     // Load suzanne mesh
     Mesh suzanne(std::string(MESH_DIR) + "/suzanne.obj", redWall, m_Triangles);
-    m_Meshes.push_back(suzanne);
 
     // Initialize SSBOs in the correct order
     initTrianglesSSBO();    // First upload triangles
-    initBVHSSBO();          // Then build and upload BVH
-    initMeshesSSBO();       // Finally upload meshes
+
+    m_BVH.build(m_Triangles, 4);    // Using 4 triangles per leaf as maximum
+    initBVHSSBO();                  // Then build and upload BVH
 
     // Add a light
     Light light1(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
@@ -230,24 +230,7 @@ void Scene::updateLightsSSBO() {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
-void Scene::initMeshesSSBO() {
-    glGenBuffers(1, &m_MeshesSSBO);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_MeshesSSBO);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, m_Meshes.size() * sizeof(Mesh), m_Meshes.data(), GL_STATIC_DRAW);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, m_MeshesSSBO);        //binding 5
-}
-
-void Scene::updateMeshesSSBO() {
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_MeshesSSBO);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, m_Meshes.size() * sizeof(Mesh), m_Meshes.data(), GL_STATIC_DRAW);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, m_MeshesSSBO);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-}
-
 void Scene::initBVHSSBO() {
-    // Build BVH from all triangles (Suzanne + ground plane)
-    m_BVH.build(m_Triangles, 4);  // Using 4 triangles per leaf as maximum
-    
     glGenBuffers(1, &m_BVHNodesSSBO);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_BVHNodesSSBO);
     glBufferData(GL_SHADER_STORAGE_BUFFER, m_BVH.m_Nodes.size() * sizeof(BVHNode), m_BVH.m_Nodes.data(), GL_STATIC_DRAW);
