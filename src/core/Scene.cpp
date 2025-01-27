@@ -124,10 +124,6 @@ void Scene::init(SDL_Window* window, float aspectRatio, GLuint computeProgram) {
     m_Lights.push_back(light1); m_Lights.push_back(light2); m_Lights.push_back(light3);
     initLightsSSBO();*/
 
-    // Load suzanne mesh
-    Mesh suzanne(std::string(MESH_DIR) + "/suzanne.obj", redWall, m_Triangles);
-    m_Meshes.push_back(suzanne);
-
     // Add ground plane
     Vector3 v0(glm::vec3(-5.0f, -1.0f, -5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     Vector3 v1(glm::vec3(-5.0f, -1.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -137,10 +133,14 @@ void Scene::init(SDL_Window* window, float aspectRatio, GLuint computeProgram) {
     m_Triangles.push_back(Triangle(v0, v1, v2, whiteWall));
     m_Triangles.push_back(Triangle(v0, v2, v3, whiteWall));
 
+    // Load suzanne mesh
+    Mesh suzanne(std::string(MESH_DIR) + "/suzanne.obj", redWall, m_Triangles);
+    m_Meshes.push_back(suzanne);
+
     // Initialize SSBOs in the correct order
-    initTrianglesSSBO();  // First upload triangles
-    initBVHSSBO();       // Then build and upload BVH
-    initMeshesSSBO();    // Finally upload meshes
+    initTrianglesSSBO();    // First upload triangles
+    initBVHSSBO();          // Then build and upload BVH
+    initMeshesSSBO();       // Finally upload meshes
 
     // Add a light
     Light light1(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
