@@ -1,58 +1,94 @@
 #include "BVH.h"
 
-void BVH::build(const std::vector<Triangle>& triangles, int maxTrianglesPerLeaf) {
-    m_OrderedTriangles = triangles;
-    std::vector<AABB> triangleBounds(triangles.size());
+void BVH::build(const std::vector<Triangle>& triangles, const int maxTrianglesPerLeaf) {
+    //eventually clear the BVH
+    //m_Nodes.clear();
+    //m_Nodes.resize(triangles.size() * 2);
 
+    std::vector<int> triangleIndices(triangles.size());
     for (size_t i = 0; i < triangles.size(); i++) {
-        triangleBounds[i] = AABB();
-        triangleBounds[i].expandToInclude(triangles[i].m_V0.m_Position);
-        triangleBounds[i].expandToInclude(triangles[i].m_V1.m_Position);
-        triangleBounds[i].expandToInclude(triangles[i].m_V2.m_Position);
+        triangleIndices[i] = i;
     }
 
-    m_RootNodeIndex = buildRecursive(0, triangles.size(), triangleBounds, maxTrianglesPerLeaf);
+    m_RootNodeIndex = buildRecursive(triangles, triangleIndices, 0, (int)triangleIndices.size(), maxTrianglesPerLeaf);
 }
 
-int BVH::buildRecursive(int start, int end, const std::vector<AABB>& primitiveBounds, int maxTrianglesPerLeaf) {
-    BVHNode node;
-    node.m_FirstPrimitive = start;
-    node.m_PrimitiveCount = end - start;
+int BVH::buildRecursive(const std::vector<Triangle>& triangles, std::vector<int>& triangleIndices, int start, int end, const int maxTrianglesPerLeaf) {
+    int nodeIndex = (int)m_Nodes.size();
+    m_Nodes.emplace_back();
+    BVHNode& node = m_Nodes[nodeIndex];
 
-    node.m_Bounds = AABB();
-    for (int i = start; i < end; i++) {
-        node.m_Bounds.expandToInclude(primitiveBounds[i]);
-    }
+    AABB bounds = computeAABB(triangles, triangleIndices, start, end);
 
-    if(node.m_PrimitiveCount <= maxTrianglesPerLeaf) {
+    int nPrimitives = end - start;
+    if (nPrimitives <= maxTrianglesPerLeaf) {
+        // Initialize all indices to -1 first
+        for (int i = 0; i < 8; i++) {
+            node.m_PrimitiveIndices[i] = -1;
+        }
+        // Then fill with actual primitive indices
+        for (int i = 0; i < nPrimitives; i++) {
+            node.m_PrimitiveIndices[i] = triangleIndices[start + i];
+        }
         node.m_LeftChild = -1;
         node.m_RightChild = -1;
-        m_Nodes.push_back(node);
-        return m_Nodes.size() - 1;
+        return nodeIndex;
     }
 
-    glm::vec3 extent = node.m_Bounds.m_Max - node.m_Bounds.m_Min;
+    glm::vec3 extent = bounds.m_Max - bounds.m_Min;
     int axis = 0;
-    if (extent.y > extent.x) axis = 1;
-    if (extent.z > extent[axis]) axis = 2;
+    if (extent.y > extent.x && extent.y > extent.z) axis = 1;
+    if (extent.z > extent.x && extent.z > extent.y) axis = 2;
 
-    int mid = (start + end) / 2;
-    std::nth_element(
-        m_OrderedTriangles.begin() + start,
-        m_OrderedTriangles.begin() + mid,
-        m_OrderedTriangles.begin() + end,
-        [axis](const Triangle& a, const Triangle& b) {
-            glm::vec3 centerA = (a.m_V0.m_Position + a.m_V1.m_Position + a.m_V2.m_Position) / 3.0f;
-            glm::vec3 centerB = (b.m_V0.m_Position + b.m_V1.m_Position + b.m_V2.m_Position) / 3.0f;
-            return centerA[axis] < centerB[axis];
+    float midValue = 0.5f * (bounds.m_Min[axis] + bounds.m_Max[axis]);
+
+    auto midIter = std::partition(
+        triangleIndices.begin() + start,
+        triangleIndices.begin() + end,
+        [&](int triIdx) {
+            glm::vec3 centroid = computeCentroid(triangles[triIdx]);
+            return centroid[axis] < midValue;
         }
     );
 
-    int nodeIndex = m_Nodes.size();
-    m_Nodes.push_back(node);
+    int mid = (int)std::distance(triangleIndices.begin(), midIter);
 
-    node.m_LeftChild = buildRecursive(start, mid, primitiveBounds, maxTrianglesPerLeaf);
-    node.m_RightChild = buildRecursive(mid, end, primitiveBounds, maxTrianglesPerLeaf);
+    if (mid == start || mid == end) {
+        mid = start + (nPrimitives / 2);
+    }
+
+    int leftChildIndex = buildRecursive(triangles, triangleIndices, start, mid, maxTrianglesPerLeaf);
+    int rightChildIndex = buildRecursive(triangles, triangleIndices, mid, end, maxTrianglesPerLeaf);
+
+    BVHNode& internalNode = m_Nodes[nodeIndex];
+    internalNode.m_Bounds = bounds;
+    internalNode.m_LeftChild = leftChildIndex;
+    internalNode.m_RightChild = rightChildIndex;
 
     return nodeIndex;
+}
+
+AABB BVH::computeAABB(const std::vector<Triangle>& triangles, 
+    const std::vector<int>& triangleIndices, 
+    int start, int end) {
+
+    AABB bounds;
+    bounds.m_Min = glm::vec3(INFINITY);
+    bounds.m_Max = glm::vec3(-INFINITY);
+
+    for (int i = start; i < end; i++) {
+        int triIdx = triangleIndices[i];
+        const Triangle& tri = triangles[triIdx];
+        bounds.m_Min = glm::min(bounds.m_Min, tri.m_V0.m_Position);
+        bounds.m_Min = glm::min(bounds.m_Min, tri.m_V1.m_Position);
+        bounds.m_Min = glm::min(bounds.m_Min, tri.m_V2.m_Position);
+        bounds.m_Max = glm::max(bounds.m_Max, tri.m_V0.m_Position);
+        bounds.m_Max = glm::max(bounds.m_Max, tri.m_V1.m_Position);
+        bounds.m_Max = glm::max(bounds.m_Max, tri.m_V2.m_Position);
+    }
+    return bounds;
+}
+
+glm::vec3 BVH::computeCentroid(const Triangle& triangle) {
+    return (triangle.m_V0.m_Position + triangle.m_V1.m_Position + triangle.m_V2.m_Position) / 3.0f;
 }

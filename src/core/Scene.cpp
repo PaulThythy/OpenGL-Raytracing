@@ -133,14 +133,15 @@ void Scene::init(SDL_Window* window, float aspectRatio, GLuint computeProgram) {
     m_Triangles.push_back(Triangle(v0, v1, v2, whiteWall));
     m_Triangles.push_back(Triangle(v0, v2, v3, whiteWall));
 
-    // Load suzanne mesh
-    Mesh suzanne(std::string(MESH_DIR) + "/suzanne.obj", redWall, m_Triangles);
+    // Load icosphere mesh
+    Mesh icosphere(std::string(MESH_DIR) + "/icosphere.obj", redWall, m_Triangles);
 
     // Initialize SSBOs in the correct order
     initTrianglesSSBO();    // First upload triangles
 
-    m_BVH.build(m_Triangles, 4);    // Using 4 triangles per leaf as maximum
-    initBVHSSBO();                  // Then build and upload BVH
+    // Build and upload BVH
+    m_BVH.build(m_Triangles);
+    initBVHSSBO();
 
     // Add a light
     Light light1(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
@@ -231,10 +232,20 @@ void Scene::updateLightsSSBO() {
 }
 
 void Scene::initBVHSSBO() {
+    // Create and bind the SSBO for BVH nodes
     glGenBuffers(1, &m_BVHNodesSSBO);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_BVHNodesSSBO);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, m_BVH.m_Nodes.size() * sizeof(BVHNode), m_BVH.m_Nodes.data(), GL_STATIC_DRAW);
+    
+    // Calculate total size needed for the buffer
+    size_t totalSize = m_BVH.m_Nodes.size() * sizeof(BVHNode);
+    
+    // Allocate and initialize the buffer
+    glBufferData(GL_SHADER_STORAGE_BUFFER, totalSize, m_BVH.m_Nodes.data(), GL_STATIC_DRAW);
+    
+    // Bind the buffer to the shader binding point
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, m_BVHNodesSSBO);  // binding 6
+    
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
 void Scene::updateBVHSSBO() {
