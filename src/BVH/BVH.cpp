@@ -23,7 +23,7 @@ int BVH::buildRecursive(const std::vector<Triangle>& triangles, std::vector<int>
     int nPrimitives = end - start;
     if (nPrimitives <= maxTrianglesPerLeaf) {
         // Initialize all indices to -1 first
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < maxTrianglesPerLeaf; i++) {
             node.m_PrimitiveIndices[i] = -1;
         }
         // Then fill with actual primitive indices

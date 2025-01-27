@@ -128,16 +128,16 @@ void Scene::init(SDL_Window* window, float aspectRatio, GLuint computeProgram) {
     initBVHSSBO();*/
 
     // Add ground plane
-    Vector3 v0(glm::vec3(-5.0f, -1.0f, -5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    Vector3 v1(glm::vec3(-5.0f, -1.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    Vector3 v2(glm::vec3(5.0f, -1.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    Vector3 v3(glm::vec3(5.0f, -1.0f, -5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    Vector3 v0(glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    Vector3 v1(glm::vec3(-5.0f, 0.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    Vector3 v2(glm::vec3(5.0f, 0.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    Vector3 v3(glm::vec3(5.0f, 0.0f, -5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
     m_Triangles.push_back(Triangle(v0, v1, v2, whiteWall));
     m_Triangles.push_back(Triangle(v0, v2, v3, whiteWall));
 
     // Load icosphere mesh
-    //Mesh icosphere(std::string(MESH_DIR) + "/icosphere.obj", redWall, m_Triangles);
+    Mesh face(std::string(MESH_DIR) + "/face.obj", redWall, m_Triangles);
 
     // Initialize SSBOs in the correct order
     initTrianglesSSBO();    // First upload triangles
@@ -147,7 +147,7 @@ void Scene::init(SDL_Window* window, float aspectRatio, GLuint computeProgram) {
     initBVHSSBO();
 
     // Add a light
-    Light light1(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
+    Light light1(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
     m_Lights.push_back(light1);
     initLightsSSBO();
 }

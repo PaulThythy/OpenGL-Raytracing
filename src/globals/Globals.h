@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 namespace Config {
-    static int SAMPLES = 10;
+    static int SAMPLES = 1;
     static int BOUNCES = 10;
 
     static const int BVH_MAX_TRIANGLES_PER_LEAF = 4;
