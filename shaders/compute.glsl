@@ -308,7 +308,7 @@ bool intersectBVH(Ray ray, inout HitRecord hitRecord) {
     stack[stackPtr++] = 0; // Push root node
     bool hit = false;
     
-    while (stackPtr > 0) {
+    while (stackPtr > 0 && stackPtr < MAX_STACK) {
         int nodeIdx = stack[--stackPtr];
         BVHNode node = BVHBuffer.nodes[nodeIdx];
         
@@ -317,7 +317,7 @@ bool intersectBVH(Ray ray, inout HitRecord hitRecord) {
             
         if (node.leftChild == -1) { // Leaf node
             // Iterate through all primitives in the node
-            for (int i = 0; i < node.primitiveIndices.length(); i++) {
+            for (int i = 0; i < 4; i++) {
                 int triIdx = node.primitiveIndices[i];
                 if (triIdx == -1) break; // Stop if we hit an unused index
                 

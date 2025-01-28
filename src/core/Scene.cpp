@@ -150,6 +150,8 @@ void Scene::init(SDL_Window* window, float aspectRatio, GLuint computeProgram) {
     Light light1(glm::vec3(0.0f, 7.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 10.0);
     m_Lights.push_back(light1);
     initLightsSSBO();
+
+    std::cout << "Scene initialized" << std::endl;
 }
 
 void Scene::initConstUniforms(GLuint computeProgram) {
