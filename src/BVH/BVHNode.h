@@ -6,7 +6,7 @@
 
 struct BVHNode {
 	AABB m_Bounds;
-	int m_PrimitiveIndices[Config::BVH_MAX_TRIANGLES_PER_LEAF];
+	alignas(16) int m_PrimitiveIndices[Config::BVH_MAX_TRIANGLES_PER_LEAF];
 	alignas(16) int m_LeftChild;
 	alignas(16) int m_RightChild;
 

@@ -11,6 +11,7 @@ void BVH::build(const std::vector<Triangle>& triangles, const int maxTrianglesPe
     }
 
     m_RootNodeIndex = buildRecursive(triangles, triangleIndices, 0, (int)triangleIndices.size(), maxTrianglesPerLeaf);
+    std::cout << "BVH build done. #Nodes = " << m_Nodes.size() << std::endl;
 }
 
 int BVH::buildRecursive(const std::vector<Triangle>& triangles, std::vector<int>& triangleIndices, int start, int end, const int maxTrianglesPerLeaf) {

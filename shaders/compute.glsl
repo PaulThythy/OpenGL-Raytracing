@@ -276,7 +276,7 @@ struct AABB {
 
 struct BVHNode {
     AABB bounds;
-    int primitiveIndices[4];        //same size as the number of primitives in the node
+    int primitiveIndices[16];        //same size as the number of primitives in the node
     int leftChild;
     int rightChild;
 };
@@ -317,7 +317,7 @@ bool intersectBVH(Ray ray, inout HitRecord hitRecord) {
             
         if (node.leftChild == -1) { // Leaf node
             // Iterate through all primitives in the node
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 16; i++) {
                 int triIdx = node.primitiveIndices[i];
                 if (triIdx == -1) break; // Stop if we hit an unused index
                 

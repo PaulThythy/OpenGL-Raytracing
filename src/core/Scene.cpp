@@ -143,7 +143,7 @@ void Scene::init(SDL_Window* window, float aspectRatio, GLuint computeProgram) {
     initTrianglesSSBO();    // First upload triangles
 
     // Build and upload BVH
-    m_BVH.build(m_Triangles);
+    m_BVH.build(m_Triangles, Config::BVH_MAX_TRIANGLES_PER_LEAF);
     initBVHSSBO();
 
     // Add a light
