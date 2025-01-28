@@ -59,12 +59,24 @@ struct Mesh {
                     }
 
                     vertices[v] = Vector3(
-                        glm::vec3(vx, vy, vz) * glm::vec3(2.0f) + glm::vec3(0.0f, 2.0f, 0.0f),  
+                        glm::vec3(vx, vy, vz),  
                         normal
                     );
                 }
 
-                outTriangles.push_back(Triangle(vertices[0], vertices[1], vertices[2], material));
+                Triangle tri(vertices[0], vertices[1], vertices[2], material);
+                std::cout 
+                    << "coordinates : \n" << 
+                        "(" << tri.m_V0.m_Position.x << ", " << tri.m_V0.m_Position.y << ", " << tri.m_V0.m_Position.z << "), \n" <<
+                        "(" << tri.m_V1.m_Position.x << ", " << tri.m_V1.m_Position.y << ", " << tri.m_V1.m_Position.z << "), \n" <<
+                        "(" << tri.m_V2.m_Position.x << ", " << tri.m_V2.m_Position.y << ", " << tri.m_V2.m_Position.z << "), \n"
+                    << "normals : \n" <<
+                        "(" << tri.m_V0.m_Normal.x << ", " << tri.m_V0.m_Normal.y << ", " << tri.m_V0.m_Normal.z << "), \n" <<
+                        "(" << tri.m_V1.m_Normal.x << ", " << tri.m_V1.m_Normal.y << ", " << tri.m_V1.m_Normal.z << "), \n" <<
+                        "(" << tri.m_V2.m_Normal.x << ", " << tri.m_V2.m_Normal.y << ", " << tri.m_V2.m_Normal.z << "), \n"
+                    << std::endl;
+
+                outTriangles.push_back(tri);
             }
         }
 

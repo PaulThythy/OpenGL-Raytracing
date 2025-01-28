@@ -137,7 +137,7 @@ void Scene::init(SDL_Window* window, float aspectRatio, GLuint computeProgram) {
     m_Triangles.push_back(Triangle(v0, v2, v3, whiteWall));
 
     // Load icosphere mesh
-    Mesh face(std::string(MESH_DIR) + "/face.obj", redWall, m_Triangles);
+    Mesh cube(std::string(MESH_DIR) + "/cube.obj", redWall, m_Triangles);
 
     // Initialize SSBOs in the correct order
     initTrianglesSSBO();    // First upload triangles
@@ -147,7 +147,7 @@ void Scene::init(SDL_Window* window, float aspectRatio, GLuint computeProgram) {
     initBVHSSBO();
 
     // Add a light
-    Light light1(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
+    Light light1(glm::vec3(0.0f, 7.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 10.0);
     m_Lights.push_back(light1);
     initLightsSSBO();
 }
