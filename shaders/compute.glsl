@@ -13,7 +13,8 @@ layout (local_size_x = 16, local_size_y = 16) in;
 layout (rgba32f, binding = 0) uniform image2D outputImage;
 layout (rgba32f, binding = 1) uniform image2D accumImage;
 
-const float EPSILON = 1e-6;
+const float EPSILON = 1e-5;
+const float SHADOW_BIAS = 0.001;
 
 float radians(float deg) {
     return deg * PI / 180.0;
@@ -409,7 +410,7 @@ void main()
                     float attenuation = 1.0 / (distance * distance);
 
                     Ray shadowRay;
-                    shadowRay.origin = hitRecord.position + N * 0.001;
+                    shadowRay.origin = hitRecord.position + N * SHADOW_BIAS;
                     shadowRay.direction = L;
 
                     HitRecord shadowHit;

@@ -21,7 +21,7 @@ void Scene::init(SDL_Window* window, float aspectRatio, GLuint computeProgram) {
     Material whiteWall({ 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, 0.0f, 0.5f, 0.0f);
     Material emissiveCeiling({ 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f }, 1.0f, 0.0f, 0.0f);
 
-    /*Triangle redWall1(
+    Triangle redWall1(
         Vector3({-5.0f, 5.0f, -5.0f}, {1.0f, 0.0f, 0.0f}),
         Vector3({-5.0f, 5.0f, 5.0f}, {1.0f, 0.0f, 0.0f}),
         Vector3({-5.0f, 0.0f, -5.0f}, {1.0f, 0.0f, 0.0f}),
@@ -118,17 +118,17 @@ void Scene::init(SDL_Window* window, float aspectRatio, GLuint computeProgram) {
 
     initSpheresSSBO();
 
-    Light light1(glm::vec3(0.0f, 4.9f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
+    /*Light light1(glm::vec3(0.0f, 4.9f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
     Light light2(glm::vec3(2.0f, 4.9f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
     Light light3(glm::vec3(-2.0f, 4.9f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0);
     m_Lights.push_back(light1); m_Lights.push_back(light2); m_Lights.push_back(light3);
-    initLightsSSBO();
+    initLightsSSBO();*/
 
     m_BVH.build(m_Triangles);
-    initBVHSSBO();*/
+    initBVHSSBO();
 
     // Add ground plane
-    Vector3 v0(glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    /*Vector3 v0(glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     Vector3 v1(glm::vec3(-5.0f, 0.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     Vector3 v2(glm::vec3(5.0f, 0.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     Vector3 v3(glm::vec3(5.0f, 0.0f, -5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -144,14 +144,14 @@ void Scene::init(SDL_Window* window, float aspectRatio, GLuint computeProgram) {
 
     // Build and upload BVH
     m_BVH.build(m_Triangles, Config::BVH_MAX_TRIANGLES_PER_LEAF);
-    std::cout << "Nombre de noeuds dans le BVH : " << m_BVH.m_Nodes.size() << std::endl;
-    std::cout << "Nombre de triangles dans la scène : " << m_Triangles.size() << std::endl;
+    std::cout << "Number of nodes in the BVH : " << m_BVH.m_Nodes.size() << std::endl;
+    std::cout << "Number of triangles in the scene : " << m_Triangles.size() << std::endl;
     initBVHSSBO();
 
     // Add a light
     Light light1(glm::vec3(0.0f, 7.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 10.0);
     m_Lights.push_back(light1);
-    initLightsSSBO();
+    initLightsSSBO();*/
 
     std::cout << "Scene initialized" << std::endl;
 }
