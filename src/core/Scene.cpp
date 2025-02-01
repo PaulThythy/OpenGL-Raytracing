@@ -137,13 +137,15 @@ void Scene::init(SDL_Window* window, float aspectRatio, GLuint computeProgram) {
     m_Triangles.push_back(Triangle(v0, v2, v3, whiteWall));
 
     // Load icosphere mesh
-    Mesh cube(std::string(MESH_DIR) + "/cube.obj", redWall, m_Triangles);
+    Mesh icosphere(std::string(MESH_DIR) + "/icosphere.obj", redWall, m_Triangles);
 
     // Initialize SSBOs in the correct order
     initTrianglesSSBO();    // First upload triangles
 
     // Build and upload BVH
     m_BVH.build(m_Triangles, Config::BVH_MAX_TRIANGLES_PER_LEAF);
+    std::cout << "Nombre de noeuds dans le BVH : " << m_BVH.m_Nodes.size() << std::endl;
+    std::cout << "Nombre de triangles dans la scène : " << m_Triangles.size() << std::endl;
     initBVHSSBO();
 
     // Add a light

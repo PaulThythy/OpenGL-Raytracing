@@ -6,16 +6,12 @@
 
 struct BVHNode {
 	AABB m_Bounds;
-	alignas(16) int m_PrimitiveIndices[Config::BVH_MAX_TRIANGLES_PER_LEAF];
-	alignas(16) int m_LeftChild;
-	alignas(16) int m_RightChild;
+	int m_PrimitiveIndices[Config::BVH_MAX_TRIANGLES_PER_LEAF];
+	int m_LeftChild = -1;
+	int m_RightChild = -1;
 
-	inline BVHNode(): m_LeftChild(-1), m_RightChild(-1) {
-		// Initialize primitive indices to -1 (invalid index)
-		for (int i = 0; i < Config::BVH_MAX_TRIANGLES_PER_LEAF; i++) {
-			m_PrimitiveIndices[i] = -1;
-		}
-	}
+	//for data alignment for std430 layout
+	int padding[2] = {0, 0};
 
 	inline bool isLeaf() const {
 		return m_LeftChild == -1 && m_RightChild == -1;

@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "math/Vector3.h"
+#include "math/AABB.h"
 #include "Material.h"
 
 struct Triangle {
@@ -23,6 +24,17 @@ struct Triangle {
     Vector3 m_V2;
 
     Material m_Material;
+
+    inline AABB getAABB() const {
+        AABB aabb;
+        aabb.m_Min = glm::min(glm::min(m_V0.m_Position, m_V1.m_Position), m_V2.m_Position);
+        aabb.m_Max = glm::max(glm::max(m_V0.m_Position, m_V1.m_Position), m_V2.m_Position);
+
+        aabb.m_Min -= glm::vec3(0.001f);
+        aabb.m_Max += glm::vec3(0.001f);
+
+        return aabb;
+    }
 };
 
 #endif

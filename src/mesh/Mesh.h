@@ -81,7 +81,6 @@ struct Mesh {
         }
 
         std::cout << "Loaded mesh: " << filename << std::endl;
-        std::cout << "Added triangles: " << shapes[0].mesh.num_face_vertices.size() << std::endl;
     }
 
     inline ~Mesh() {}

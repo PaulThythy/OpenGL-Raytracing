@@ -12,12 +12,7 @@ struct AABB {
 
 	inline AABB(const glm::vec3& min, const glm::vec3& max) : m_Min(min), m_Max(max) {}
 
-	inline void expandToInclude(const glm::vec3& point) {
-		m_Min = glm::min(m_Min, point);
-		m_Max = glm::max(m_Max, point);
-	}
-
-	inline void expandToInclude(const AABB& other) {
+	inline void expand(const AABB& other) {
 		m_Min = glm::min(m_Min, other.m_Min);
 		m_Max = glm::max(m_Max, other.m_Max);
 	}
@@ -29,6 +24,10 @@ struct AABB {
 	inline float getSurface() const {
 		glm::vec3 extent = m_Max - m_Min;
 		return 2.0f * (extent.x * extent.y + extent.y * extent.z + extent.z * extent.x);
+	}
+
+	inline bool contains(const glm::vec3& point) const {
+		return glm::all(glm::lessThanEqual(m_Min, point)) && glm::all(glm::lessThanEqual(point, m_Max));
 	}
 };
 
