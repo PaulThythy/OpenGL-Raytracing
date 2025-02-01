@@ -59,7 +59,7 @@ struct Mesh {
                     }
 
                     vertices[v] = Vector3(
-                        glm::vec3(vx, vy, vz),  
+                        glm::vec3(vx, vy + 2.0f, vz),  
                         normal
                     );
                 }

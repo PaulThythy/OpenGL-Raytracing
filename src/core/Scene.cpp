@@ -159,8 +159,9 @@ void Scene::init(SDL_Window* window, float aspectRatio, GLuint computeProgram) {
 void Scene::initConstUniforms(GLuint computeProgram) {
     glUseProgram(computeProgram);
 
-    GLint samplesLoc = glGetUniformLocation(computeProgram, "SAMPLES");
-    GLint bouncesLoc = glGetUniformLocation(computeProgram, "BOUNCES");
+    GLint samplesLoc    = glGetUniformLocation(computeProgram, "SAMPLES");
+    GLint bouncesLoc    = glGetUniformLocation(computeProgram, "BOUNCES");
+    GLint useBVHLoc     = glGetUniformLocation(computeProgram, "USE_BVH");
 
     if (samplesLoc == -1) {
         std::cerr << "Warning: 'SAMPLES' uniform not found.\n";
@@ -176,6 +177,12 @@ void Scene::initConstUniforms(GLuint computeProgram) {
         glUniform1i(bouncesLoc, Config::BOUNCES);
     }
 
+    if(useBVHLoc == -1) {
+        std::cerr << "Warning: 'SAMPLES' uniform not found.\n";
+    } else {
+        glUniform1i(useBVHLoc, Config::USE_BVH ? 1 : 0);
+    }
+
     glUseProgram(0);
 }
 
@@ -184,6 +191,7 @@ void Scene::updateConstUniforms(GLuint computeProgram) {
 
     GLint samplesLoc = glGetUniformLocation(computeProgram, "SAMPLES");
     GLint bouncesLoc = glGetUniformLocation(computeProgram, "BOUNCES");
+    GLint useBVHLoc  = glGetUniformLocation(computeProgram, "USE_BVH");
 
     if (samplesLoc != -1) {
         glUniform1i(samplesLoc, Config::SAMPLES);
@@ -191,6 +199,10 @@ void Scene::updateConstUniforms(GLuint computeProgram) {
 
     if (bouncesLoc != -1) {
         glUniform1i(bouncesLoc, Config::BOUNCES);
+    }
+
+    if (useBVHLoc != -1) {
+        glUniform1i(useBVHLoc, Config::USE_BVH ? 1 : 0);
     }
 
     glUseProgram(0);

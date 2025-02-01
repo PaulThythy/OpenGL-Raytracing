@@ -5,6 +5,7 @@
 
 uniform int SAMPLES;
 uniform int BOUNCES;
+uniform bool USE_BVH;
 
 uniform int uFrameCount;
 
@@ -276,7 +277,7 @@ struct AABB {
 
 struct BVHNode {
     AABB bounds;
-    int primitiveIndices[12];        //same size as the number of primitives in the node
+    int primitiveIndices[8];        //same size as the number of primitives in the node
     int leftChild;
     int rightChild;
 };
@@ -359,9 +360,16 @@ bool traceRay(Ray ray, out HitRecord hitRecord) {
         }
     }
 
-    // Test all triangles using BVH
-    if (intersectBVH(ray, hitRecord)) {
-        hitSomething = true;
+    if (USE_BVH) {
+        if (intersectBVH(ray, hitRecord)) {
+            hitSomething = true;
+        }
+    } else {
+        for (int i = 0; i < TrianglesBuffer.triangles.length(); ++i) {
+            if (intersectTriangle(ray, TrianglesBuffer.triangles[i], hitRecord)) {
+                hitSomething = true;
+            }
+        }
     }
 
     return hitSomething;
