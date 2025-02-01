@@ -80,7 +80,7 @@ void Application::initSDL() {
     SDL_GL_MakeCurrent(m_Window, m_GLContext);
 
     // Activate VSync
-    SDL_GL_SetSwapInterval(1);
+    SDL_GL_SetSwapInterval(0);
 
     if (glewInit() != GLEW_OK) {
         std::runtime_error(std::string("Failed to initialize GLEW"));
