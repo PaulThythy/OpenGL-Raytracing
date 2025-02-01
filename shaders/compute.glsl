@@ -169,16 +169,8 @@ bool intersectTriangle(Ray ray, Triangle tri, inout HitRecord rec) {
     return true;
 }
 
-Ray getCameraRay(float u, float v)
+Ray getCameraRay(float u, float v, vec3 forward, vec3 right, vec3 upVec, float halfWidth, float halfHeight)
 {
-    vec3 forward = normalize(camera.lookAt - camera.lookFrom);
-    vec3 right   = normalize(cross(forward, camera.up));
-    vec3 upVec   = cross(right, forward);
-
-    float fovRad     = radians(camera.fov);
-    float halfHeight = tan(fovRad * 0.5);
-    float halfWidth  = camera.aspectRatio * halfHeight;  
-
     float x = 2.0 * u - 1.0;
     float y = 2.0 * v - 1.0;
 
@@ -382,6 +374,13 @@ void main()
     vec2 imgSize = vec2(imageSize(outputImage));
     vec3 color = vec3(0.0);
 
+    vec3 forward = normalize(camera.lookAt - camera.lookFrom);
+    vec3 right   = normalize(cross(forward, camera.up));
+    vec3 upVec   = cross(right, forward);
+    float fovRad = radians(camera.fov);
+    float halfHeight = tan(fovRad * 0.5);
+    float halfWidth  = camera.aspectRatio * halfHeight;
+
     for(int sampleIndex = 0; sampleIndex < SAMPLES; ++sampleIndex) {
         float seed = float(uFrameCount) + float(pixelCoord.x) / imgSize.x + float(pixelCoord.y) / imgSize.y;
         float offsetX = rand(vec2(pixelCoord), seed);
@@ -389,7 +388,7 @@ void main()
         vec2 randOffset = vec2(offsetX, offsetY);
         vec2 uv = (vec2(pixelCoord) + randOffset) / imgSize;
 
-        Ray ray = getCameraRay(uv.x, uv.y); 
+        Ray ray = getCameraRay(uv.x, uv.y, forward, right, upVec, halfWidth, halfHeight);
 
         vec3 throughput = vec3(1.0);
 
