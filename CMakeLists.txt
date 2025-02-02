@@ -72,5 +72,7 @@ target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
 
 file(TO_CMAKE_PATH "${PROJECT_SOURCE_DIR}/shaders" SHADER_DIR)
 file(TO_CMAKE_PATH "${PROJECT_SOURCE_DIR}/mesh" MESH_DIR)
+file(TO_CMAKE_PATH "${PROJECT_SOURCE_DIR}/skyboxes" SKYBOXES_DIR)
 target_compile_definitions(${PROJECT_NAME} PRIVATE SHADER_DIR="${SHADER_DIR}")
 target_compile_definitions(${PROJECT_NAME} PRIVATE MESH_DIR="${MESH_DIR}")
+target_compile_definitions(${PROJECT_NAME} PRIVATE SKYBOXES_DIR="${SKYBOXES_DIR}")
