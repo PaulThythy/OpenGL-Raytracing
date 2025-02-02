@@ -1,5 +1,8 @@
 #include "Renderer.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 Renderer::Renderer() {}
 
 Renderer::~Renderer() { cleanup(); }
@@ -7,6 +10,7 @@ Renderer::~Renderer() { cleanup(); }
 void Renderer::init(int width, int height, SDL_Window* window) {
     initComputeShader(width, height);
     initRenderShader();
+    initSkybox();
     m_Scene.init(window, static_cast<float>(width)/static_cast<float>(height), m_ComputeProgram);
 }
 
@@ -171,6 +175,36 @@ void Renderer::initRenderShader() {
     glBindVertexArray(0);
 
     std::cout << "Render shader initialized.\n";
+}
+
+void Renderer::initSkybox() {
+    int width, height, nrComponents;
+
+    stbi_set_flip_vertically_on_load(true);
+    std::string filePath = std::string(SKYBOXES_DIR) + "/autumn_field_2k.hdr";
+    float* data = stbi_loadf(filePath.c_str(), &width, &height, &nrComponents, 0);
+    if (data)
+    {
+        glGenTextures(1, &m_SkyboxTexture);
+
+        glActiveTexture(GL_TEXTURE7);
+        glBindTexture(GL_TEXTURE_2D, m_SkyboxTexture);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, data);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+        std::cout << "Skybox HDR loaded successfully.\n";
+    }
+    else
+    {
+        std::cerr << "Failed to load HDR skybox texture.\n";
+    }
+    glActiveTexture(GL_TEXTURE0);
 }
 
 void Renderer::runComputeShader(int width, int height)

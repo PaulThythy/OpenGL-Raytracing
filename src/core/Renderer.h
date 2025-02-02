@@ -22,6 +22,8 @@ public:
     void initComputeShader(int windowWidth, int windowHeight);
     void initRenderShader();
 
+    void initSkybox();
+
     GLuint m_ComputeProgram     = 0;
     GLuint m_RenderProgram      = 0;
 
@@ -30,6 +32,8 @@ public:
 
     GLuint m_QuadVAO            = 0;
     GLuint m_QuadVBO            = 0;
+
+    GLuint m_SkyboxTexture      = 0;
 
     Scene m_Scene;
 

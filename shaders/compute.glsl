@@ -8,6 +8,7 @@ uniform int BOUNCES;
 uniform bool USE_BVH;
 
 uniform int uFrameCount;
+layout(binding = 7) uniform sampler2D uSkybox;
 
 layout (local_size_x = 16, local_size_y = 16) in;
 layout (rgba32f, binding = 0) uniform image2D outputImage;
@@ -167,6 +168,15 @@ bool intersectTriangle(Ray ray, Triangle tri, inout HitRecord rec) {
     rec.material = tri.material;
 
     return true;
+}
+
+vec3 sampleSkybox(vec3 dir) {
+    vec3 d = normalize(dir);
+    float u = 0.5 + atan(d.z, d.x) / (2.0 * PI);
+    float v = 0.5 - asin(clamp(d.y, -1.0, 1.0)) / PI;
+    //vertical axis correction
+    v = 1.0 - v;
+    return texture(uSkybox, vec2(u, v)).rgb;
 }
 
 Ray getCameraRay(float u, float v, vec3 forward, vec3 right, vec3 upVec, float halfWidth, float halfHeight)
@@ -439,6 +449,8 @@ void main()
                     break;
 
             } else {
+                // if we use a skybox
+                color += throughput * sampleSkybox(ray.direction);
                 break;
             }
         }

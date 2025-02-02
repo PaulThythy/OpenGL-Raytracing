@@ -24,6 +24,10 @@ set(TINYOBJLOADER_SOURCE_DIR ${CMAKE_SOURCE_DIR}/libs/tinyobjloader)
 add_subdirectory(${TINYOBJLOADER_SOURCE_DIR})
 include_directories(${TINYOBJLOADER_SOURCE_DIR})
 
+# stb_image
+set(STBIMAGE_SOURCE_DIR ${CMAKE_SOURCE_DIR}/libs/stb)
+include_directories(${STBIMAGE_SOURCE_DIR})
+
 add_executable(${PROJECT_NAME} ${sources} ${headers}
     ${IMGUI_DIR}/imgui.cpp ${IMGUI_DIR}/imgui_demo.cpp ${IMGUI_DIR}/imgui_draw.cpp ${IMGUI_DIR}/imgui_tables.cpp ${IMGUI_DIR}/imgui_widgets.cpp
     ${IMGUI_DIR}/backends/imgui_impl_sdl3.cpp ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp ${TINYOBJLOADER_SOURCE_DIR}/tiny_obj_loader.h
